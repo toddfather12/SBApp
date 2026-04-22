@@ -1,0 +1,16 @@
+{
+  "name": "southern-bay-construction",
+  "version": "1.0.0",
+  "description": "Southern Bay Construction — Multi-project timeline manager",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --experimental-sqlite server.js",
+    "dev": "nodemon --experimental-sqlite server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

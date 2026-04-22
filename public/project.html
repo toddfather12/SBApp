@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Southern Bay Construction — Project</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --dark:#1A2733; --mid:#2C3E50; --terra:#B85038; --amber:#C49A3C;
+    --cream:#F7F2EB; --sand:#EDE5D8; --white:#FFFFFF; --txt:#2C3440;
+    --txt-m:#5A6A7A; --txt-l:#8A9AB0; --border:#D5C9BC; --green:#3A6A5A;
+    --green-l:#EAF3E8; --red-l:#FFF0EE;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);min-height:100vh}
+
+  /* HEADER */
+  .header{background:var(--dark);border-bottom:3px solid var(--terra);padding:0 32px;height:60px;
+    display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+  .h-brand{display:flex;align-items:center;gap:14px}
+  .h-logo{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;
+    color:var(--terra);letter-spacing:2px;text-transform:uppercase}
+  .h-sep{width:1px;height:20px;background:#2C3E50}
+  .h-name{font-family:'DM Serif Display';font-size:17px;color:var(--white);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px}
+  .h-back{color:#6A8AA0;font-size:13px;text-decoration:none;display:flex;align-items:center;
+    gap:6px;transition:color .15s;font-weight:500}
+  .h-back:hover{color:var(--white)}
+
+  /* VIEW TOGGLE */
+  .view-bar{background:var(--mid);padding:10px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .view-toggle{display:flex;gap:4px;background:#1A2733;border-radius:6px;padding:3px}
+  .vt-btn{border:none;border-radius:4px;padding:6px 16px;font-family:'DM Sans',sans-serif;
+    font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.3px;transition:all .15s}
+  .vt-btn.active{background:var(--terra);color:#fff}
+  .vt-btn:not(.active){background:transparent;color:#6A8AA0}
+  .vt-btn:not(.active):hover{color:var(--white)}
+  .progress-wrap{display:flex;align-items:center;gap:12px;flex:1;max-width:400px}
+  .progress-label{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6A8AA0;white-space:nowrap}
+  .progress-bar{flex:1;height:6px;background:#1A2733;border-radius:3px;overflow:hidden}
+  .progress-fill{height:100%;background:var(--terra);border-radius:3px;transition:width .4s}
+  .progress-pct{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--terra);font-weight:500;white-space:nowrap}
+
+  /* PAGE */
+  .page{max-width:900px;margin:0 auto;padding:32px 24px 60px}
+
+  /* PROJECT META (editable) */
+  .meta-card{background:var(--white);border:1px solid var(--border);border-radius:10px;
+    padding:24px;margin-bottom:28px}
+  .meta-title{font-family:'DM Serif Display';font-size:15px;color:var(--txt-m);margin-bottom:16px;
+    display:flex;align-items:center;gap:8px}
+  .meta-title span{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--terra);
+    background:var(--sand);padding:2px 8px;border-radius:3px;text-transform:uppercase;letter-spacing:1px}
+  .meta-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+  .mg-field{display:flex;flex-direction:column;gap:5px}
+  .mg-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--terra)}
+  .mg-input{font-family:'DM Sans',sans-serif;font-size:13px;border:1.5px solid var(--border);
+    border-radius:5px;padding:7px 10px;color:var(--txt);background:var(--white);
+    outline:none;transition:border-color .15s;width:100%}
+  .mg-input:focus{border-color:var(--terra)}
+  .mg-input.saving{border-color:var(--amber)}
+  .mg-input.saved{border-color:var(--green)}
+
+  /* PHASE ACCORDION */
+  .phases{display:flex;flex-direction:column;gap:12px}
+  .phase{border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+  .phase-head{display:flex;align-items:center;cursor:pointer;padding:0;gap:0;
+    background:var(--dark);user-select:none;transition:background .15s}
+  .phase-head:hover .ph-arrow{color:var(--terra)}
+  .ph-num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--terra);
+    font-weight:500;padding:16px 14px 16px 20px;white-space:nowrap}
+  .ph-title{font-family:'DM Serif Display';font-size:17px;color:var(--white);flex:1;padding:14px 8px}
+  .ph-meta{display:flex;align-items:center;gap:10px;padding:0 18px 0 0}
+  .ph-tasks{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#6A8AA0}
+  .ph-check{width:20px;height:20px;border-radius:50%;border:2px solid #3A4A5A;
+    display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .2s}
+  .ph-check.complete{background:var(--green);border-color:var(--green);color:#fff}
+  .ph-arrow{font-size:12px;color:#6A8AA0;margin-left:6px;transition:transform .2s}
+  .phase.open .ph-arrow{transform:rotate(180deg)}
+  .phase-body{display:none;background:var(--white)}
+  .phase.open .phase-body{display:block}
+
+  /* CUSTOMER VIEW (light / consumer-friendly) */
+  .cv{padding:28px 28px 24px}
+  .cv-milestone{margin-bottom:24px}
+  .cv-milestone-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;
+    color:var(--terra);margin-bottom:8px}
+  .cv-milestone-text{font-size:15px;line-height:1.65;color:var(--txt);max-width:620px}
+  .cv-what{background:var(--green-l);border-left:3px solid var(--green);border-radius:0 6px 6px 0;
+    padding:14px 18px;margin-bottom:20px}
+  .cv-what-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;
+    color:var(--green);margin-bottom:5px}
+  .cv-what-text{font-size:14px;color:#2A4A3A;line-height:1.6}
+  .cv-payments{background:var(--sand);border-radius:8px;padding:16px 20px;margin-bottom:20px}
+  .cv-pay-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;
+    color:var(--txt-m);margin-bottom:10px}
+  .cv-pay-row{display:flex;justify-content:space-between;align-items:center;
+    padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+  .cv-pay-row:last-child{border-bottom:none}
+  .cv-pay-milestone{color:var(--txt)}
+  .cv-pay-pct{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--terra);font-weight:500}
+  .cv-note-wrap{margin-top:8px}
+  .cv-note-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;
+    color:var(--txt-m);margin-bottom:6px}
+  .cv-note{width:100%;font-family:'DM Sans',sans-serif;font-size:13px;border:1.5px solid var(--border);
+    border-radius:6px;padding:10px 12px;color:var(--txt);resize:vertical;min-height:72px;
+    outline:none;transition:border-color .15s;background:var(--white)}
+  .cv-note:focus{border-color:var(--terra)}
+
+  /* PM VIEW (dark / technical) */
+  .pm{display:none;background:#F2EDE6;border-top:2px solid var(--sand)}
+  .pm.show{display:block}
+  .pm-inner{padding:24px 28px}
+  .pm-section{margin-bottom:22px}
+  .pm-section:last-child{margin-bottom:0}
+  .pm-sec-title{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;
+    text-transform:uppercase;letter-spacing:2px;color:var(--terra);margin-bottom:12px}
+
+  /* TASK LIST */
+  .task-list{display:flex;flex-direction:column;gap:4px}
+  .task-item{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:6px;
+    cursor:pointer;transition:background .12s;border:1px solid transparent}
+  .task-item:hover{background:var(--white);border-color:var(--border)}
+  .task-item.done{opacity:.6}
+  .task-cb{width:16px;height:16px;border:2px solid var(--border);border-radius:3px;flex-shrink:0;
+    margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+  .task-item.done .task-cb{background:var(--green);border-color:var(--green);color:#fff;font-size:9px}
+  .task-label{font-size:13px;color:var(--txt);line-height:1.4}
+  .task-item.done .task-label{text-decoration:line-through;color:var(--txt-l)}
+
+  /* COST TABLE */
+  .cost-table{width:100%;border-collapse:collapse;font-size:13px}
+  .cost-table th{text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;
+    letter-spacing:1px;color:var(--txt-m);padding:6px 10px 8px;border-bottom:1.5px solid var(--border)}
+  .cost-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+  .cost-table tr:last-child td{border-bottom:none}
+  .cost-table .ct-item{color:var(--txt);font-weight:500}
+  .cost-table .ct-note{font-size:11px;color:var(--txt-m);margin-top:2px}
+  .cost-table .ct-cost{font-family:'IBM Plex Mono',monospace;color:var(--terra);white-space:nowrap;
+    text-align:right}
+  .cost-total{display:flex;justify-content:space-between;margin-top:10px;padding:10px 10px 0;
+    border-top:2px solid var(--border)}
+  .cost-total-label{font-weight:600;font-size:13px;color:var(--txt)}
+  .cost-total-val{font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--terra);font-weight:500}
+
+  /* DIVIDER label between CV and PM */
+  .pm-divider{background:var(--mid);padding:8px 28px;display:none;align-items:center;gap:10px}
+  .pm-divider.show{display:flex}
+  .pm-div-label{font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;
+    letter-spacing:2px;color:#6A8AA0}
+  .pm-div-line{flex:1;height:1px;background:#3A4A5A}
+
+  /* UTIL */
+  .hidden{display:none!important}
+
+  @media(max-width:640px){
+    .page{padding:20px 14px 40px}
+    .view-bar{padding:10px 16px}
+    .header{padding:0 16px}
+    .h-name{max-width:160px;font-size:14px}
+    .cv{padding:20px 18px}
+    .pm-inner{padding:18px}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="h-brand">
+    <span class="h-logo">Southern Bay</span>
+    <div class="h-sep"></div>
+    <span class="h-name" id="h-name">Loading…</span>
+  </div>
+  <a class="h-back" href="/">← All Projects</a>
+</div>
+
+<div class="view-bar">
+  <div class="view-toggle">
+    <button class="vt-btn active" data-view="customer" onclick="setView('customer')">Client View</button>
+    <button class="vt-btn" data-view="both" onclick="setView('both')">Both</button>
+    <button class="vt-btn" data-view="pm" onclick="setView('pm')">PM View</button>
+  </div>
+  <div class="progress-wrap">
+    <span class="progress-label">PROGRESS</span>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    <span class="progress-pct" id="prog-pct">0%</span>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- EDITABLE PROJECT META -->
+  <div class="meta-card">
+    <div class="meta-title">Project Details <span>Auto-saves</span></div>
+    <div class="meta-grid">
+      <div class="mg-field" style="grid-column:span 2">
+        <div class="mg-label">Project Name</div>
+        <input class="mg-input" id="m-name" type="text" data-field="name">
+      </div>
+      <div class="mg-field">
+        <div class="mg-label">Client Name</div>
+        <input class="mg-input" id="m-client" type="text" data-field="client_name">
+      </div>
+      <div class="mg-field">
+        <div class="mg-label">Address</div>
+        <input class="mg-input" id="m-addr" type="text" data-field="address">
+      </div>
+      <div class="mg-field">
+        <div class="mg-label">Project Manager</div>
+        <input class="mg-input" id="m-pm" type="text" data-field="pm">
+      </div>
+      <div class="mg-field">
+        <div class="mg-label">Contract Date</div>
+        <input class="mg-input" id="m-start" type="date" data-field="contract_date">
+      </div>
+      <div class="mg-field">
+        <div class="mg-label">Est. Completion</div>
+        <input class="mg-input" id="m-end" type="date" data-field="est_completion">
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASES -->
+  <div class="phases" id="phases"></div>
+
+</div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+
+const PHASES = [
+  {
+    id: 1,
+    title: 'Pre-Construction & Planning',
+    customer: {
+      milestone: 'Your project is officially underway. During this phase we finalize plans, pull permits, and line up all the right people — so that when ground breaks, everything moves smoothly.',
+      whatYoullSee: 'You\'ll meet with your project manager to walk through the full scope. Expect permit signage to appear at the property. This phase typically takes 2–4 weeks.',
+      payments: [
+        { label: 'Signed contract deposit', pct: '10%' },
+      ],
+    },
+    pm: {
+      tasks: [
+        'Execute signed contract + collect deposit',
+        'Submit permit applications (building, electrical, plumbing)',
+        'Confirm subcontractor availability & schedule',
+        'Order long-lead materials (windows, doors, cabinetry)',
+        'Site survey & soil test complete',
+        'Final construction drawings approved',
+        'Homeowner pre-construction meeting held',
+        'Set up project management file & contact list',
+      ],
+      costs: [
+        { item: 'Permit fees', note: 'Varies by municipality', cost: 'Varies' },
+        { item: 'Engineering / soil test', note: '', cost: 'Est. cost' },
+        { item: 'Architecture final review', note: 'If applicable', cost: 'Est. cost' },
+      ],
+    },
+  },
+  {
+    id: 2,
+    title: 'Site Preparation & Foundation',
+    customer: {
+      milestone: 'The land is cleared and your home\'s foundation is poured — the literal ground your home will stand on for generations.',
+      whatYoullSee: 'Heavy equipment on site clearing trees and grading. Concrete forms, rebar, and eventually the foundation pour. After the pour, the concrete must cure (about 7 days) before framing begins.',
+      payments: [
+        { label: 'Foundation complete', pct: '10%' },
+      ],
+    },
+    pm: {
+      tasks: [
+        'Site clearing & tree removal complete',
+        'Rough grading done, erosion controls in place',
+        'Survey stakes set — footing layout verified',
+        'Footings excavated & inspected',
+        'Footings poured & cured',
+        'Foundation walls formed & poured',
+        'Foundation inspection passed',
+        'Waterproofing & drainage board applied',
+        'Backfill complete',
+        'Underground plumbing rough-in done',
+      ],
+      costs: [
+        { item: 'Excavation & grading', note: '', cost: 'Est. cost' },
+        { item: 'Concrete (footings + walls)', note: '', cost: 'Est. cost' },
+        { item: 'Waterproofing & drainage', note: '', cost: 'Est. cost' },
+        { item: 'Underground plumbing rough', note: '', cost: 'Est. cost' },
+      ],
+    },
+  },
+  {
+    id: 3,
+    title: 'Framing',
+    customer: {
+      milestone: 'This is the most visually dramatic phase — your home\'s skeleton rises from the foundation. Walls, floors, and the roof structure all go up in a matter of weeks.',
+      whatYoullSee: 'A flurry of activity as lumber arrives and walls go up fast. You\'ll be able to walk through the actual rooms for the first time. A great milestone to visit the site!',
+      payments: [
+        { label: 'Framing complete (walls up)', pct: '15%' },
+      ],
+    },
+    pm: {
+      tasks: [
+        'Lumber delivery & material staging',
+        'First floor deck framed',
+        'Exterior walls framed & plumb',
+        'Second floor deck (if applicable)',
+        'Interior walls framed',
+        'Roof trusses / rafters installed',
+        'Roof sheathing applied',
+        'Windows & exterior doors set',
+        'Framing inspection passed',
+        'House wrap / weather barrier applied',
+      ],
+      costs: [
+        { item: 'Lumber & engineered wood', note: '', cost: 'Est. cost' },
+        { item: 'Framing labor', note: '', cost: 'Est. cost' },
+        { item: 'Windows & exterior doors', note: 'Per allowance', cost: 'Est. cost' },
+        { item: 'Roof trusses / rafters', note: '', cost: 'Est. cost' },
+      ],
+    },
+  },
+  {
+    id: 4,
+    title: 'Roofing & Exterior',
+    customer: {
+      milestone: 'The home is now weather-tight. Roofing, siding, and exterior finishes are complete — protecting everything inside from the elements.',
+      whatYoullSee: 'Shingles going on the roof, siding or brick work on the exterior walls. The home starts looking like a real house from the street.',
+      payments: [
+        { label: 'Roof & exterior dried in', pct: '10%' },
+      ],
+    },
+    pm: {
+      tasks: [
+        'Roof underlayment installed',
+        'Shingles / roofing material installed',
+        'Gutters & downspouts installed',
+        'Exterior siding installed (or brick work started)',
+        'Exterior trim & fascia complete',
+        'Exterior paint / finish coat',
+        'Roofing & exterior inspection passed',
+      ],
+      costs: [
+        { item: 'Roofing material & labor', note: '', cost: 'Est. cost' },
+        { item: 'Gutters', note: '', cost: 'Est. cost' },
+        { item: 'Siding / masonry', note: '', cost: 'Est. cost' },
+        { item: 'Exterior paint', note: '', cost: 'Est. cost' },
+      ],
+    },
+  },
+  {
+    id: 5,
+    title: 'Rough Mechanical — Electrical, Plumbing & HVAC',
+    customer: {
+      milestone: 'The "guts" of your home go in — all the wiring, pipes, and ductwork that will power, plumb, and climate-control every room.',
+      whatYoullSee: 'Walls open with wires, pipes, and duct runs visible. Electricians, plumbers, and HVAC techs all working simultaneously. Everything will be hidden behind drywall soon.',
+      payments: [
+        { label: 'Rough mechanicals inspected', pct: '10%' },
+      ],
+    },
+    pm: {
+      tasks: [
+        'Electrical panel location confirmed',
+        'Rough electrical wiring complete',
+        'Low-voltage (data, audio, security) rough-in',
+        'Plumbing supply & drain rough-in complete',
+        'HVAC ductwork & equipment rough-in',
+        'Gas lines roughed in (if applicable)',
+        'Rough electrical inspection passed',
+        'Rough plumbing inspection passed',
+        'Rough HVAC / mechanical inspection passed',
+        'Insulation inspection (if required before insulation)',
+      ],
+      costs: [
+        { item: 'Electrical rough-in', note: '', cost: 'Est. cost' },
+        { item: 'Plumbing rough-in', note: '', cost: 'Est. cost' },
+        { item: 'HVAC equipment & ductwork', note: '', cost: 'Est. cost' },
+        { item: 'Low-voltage / data', note: '', cost: 'Est. cost' },
+      ],
+    },
+  },
+  {
+    id: 6,
+    title: 'Insulation',
+    customer: {
+      milestone: 'The home is sealed and insulated for energy efficiency and comfort — keeping it cool in Alabama summers and warm in winter, and keeping your utility bills in check.',
+      whatYoullSee: 'Pink or yellow batts (or spray foam) filling the wall cavities and attic. A short but important phase — typically 2–3 days.',
+      payments: [],
+    },
+    pm: {
+      tasks: [
+        'Wall cavity insulation installed',
+        'Attic insulation blown in / installed',
+        'Crawl space / floor insulation (if applicable)',
+        'Spray foam at penetrations & rim joists',
+        'Insulation inspection passed',
+        'Vapor barrier installed',
+      ],
+      costs: [
+        { item: 'Batt insulation', note: '', cost: 'Est. cost' },
+        { item: 'Blown-in attic insulation', note: '', cost: 'Est. cost' },
+        { item: 'Spray foam (penetrations)', note: '', cost: 'Est. cost' },
+      ],
+    },
+  },
+  {
+    id: 7,
+    title: 'Drywall & Interior Finishes',
+    customer: {
+      milestone: 'Walls and ceilings go up and the interior starts feeling like real living space. Paint, trim, and interior doors transform the shell into your home.',
+      whatYoullSee: 'Large sheets of drywall being hung, then taped, mudded, and sanded. A lot of white dust! Then primer coats, final paint colors, and beautiful trim going up.',
+      payments: [
+        { label: 'Drywall hang complete', pct: '10%' },
+      ],
+    },
+    pm: {
+      tasks: [
+        'Drywall delivered & staged',
+        'Drywall hung (walls & ceilings)',
+        'Tape & first coat of mud',
+        'Second & third mud coats / sanding',
+        'Drywall inspection (if required)',
+        'Primer coat applied',
+        'Final paint — walls & ceilings',
+        'Interior doors hung & hardware set',
+        'Baseboard, casing & crown molding installed',
+        'Closet shelving installed',
+        'Interior paint touch-up complete',
+      ],
+      costs: [
+        { item: 'Drywall material & labor', note: '', cost: 'Est. cost' },
+        { item: 'Paint (material & labor)', note: '', cost: 'Est. cost' },
+        { item: 'Interior doors & hardware', note: 'Per allowance', cost: 'Est. cost' },
+        { item: 'Trim & millwork', note: '', cost: 'Est. cost' },
+      ],
+    },
+  },
+  {
+    id: 8,
+    title: 'Flooring',
+    customer: {
+      milestone: 'Floors go in across the whole home — one of the most satisfying visual milestones. This is when the selections you made months ago become real.',
+      whatYoullSee: 'Hardwood, tile, or LVP being installed room by room. Areas may be sectioned off to cure or acclimate. This phase can take 1–2 weeks depending on the home.',
+      payments: [
+        { label: 'Flooring complete', pct: '10%' },
+      ],
+    },
+    pm: {
+      tasks: [
+        'Subfloor prep & leveling complete',
+        'Hardwood / LVP flooring installed',
+        'Tile flooring installed (baths, kitchen)',
+        'Grout applied & sealed',
+        'Carpet installed (if applicable)',
+        'Floor transitions & thresholds set',
+        'Stair treads & risers finished',
+      ],
+      costs: [
+        { item: 'Hardwood / LVP material & labor', note: 'Per allowance', cost: 'Est. cost' },
+        { item: 'Tile material & labor', note: 'Per allowance', cost: 'Est. cost' },
+        { item: 'Carpet (if applicable)', note: 'Per allowance', cost: 'Est. cost' },
+      ],
+    },
+  },
+  {
+    id: 9,
+    title: 'Cabinets, Counters & Fixture Trim-Out',
+    customer: {
+      milestone: 'Kitchens, bathrooms, and all the details that make a house feel like YOUR home come together — cabinets, countertops, fixtures, and appliances.',
+      whatYoullSee: 'Cabinet delivery and installation, countertop templating and install, plumbing fixtures set, light fixtures hung, appliances dropped in. The home is nearly complete.',
+      payments: [
+        { label: 'Cabinets & counters installed', pct: '10%' },
+      ],
+    },
+    pm: {
+      tasks: [
+        'Kitchen cabinets delivered & installed',
+        'Bath vanities installed',
+        'Countertop template done',
+        'Countertops fabricated & installed',
+        'Backsplash tile installed & grouted',
+        'Plumbing trim-out (fixtures, faucets, toilets)',
+        'Electrical trim-out (outlets, switches, fixtures)',
+        'HVAC trim-out (registers, thermostats)',
+        'Appliances delivered & installed',
+        'Mirrors & bath accessories installed',
+        'Hardware on all cabinets & doors',
+      ],
+      costs: [
+        { item: 'Cabinets', note: 'Per allowance', cost: 'Est. cost' },
+        { item: 'Countertops', note: 'Per allowance', cost: 'Est. cost' },
+        { item: 'Plumbing fixtures & trim-out', note: 'Per allowance', cost: 'Est. cost' },
+        { item: 'Electrical fixtures & trim-out', note: 'Per allowance', cost: 'Est. cost' },
+        { item: 'Appliances', note: 'Per allowance', cost: 'Est. cost' },
+      ],
+    },
+  },
+  {
+    id: 10,
+    title: 'Final Inspections & Punch List',
+    customer: {
+      milestone: 'The finish line. Final inspections are passed, every detail is corrected, the home is cleaned, and keys are handed over. Welcome home.',
+      whatYoullSee: 'Inspectors walking through, small crews fixing any remaining items (the "punch list"). A deep clean of the entire home. Your final walk-through, then closing.',
+      payments: [
+        { label: 'Certificate of Occupancy issued', pct: '10%' },
+        { label: 'Final walk-through & key handover', pct: '5%' },
+      ],
+    },
+    pm: {
+      tasks: [
+        'Mechanical finals — electrical inspection passed',
+        'Mechanical finals — plumbing inspection passed',
+        'Mechanical finals — HVAC inspection passed',
+        'Certificate of Occupancy obtained',
+        'Punch list generated from contractor walk',
+        'Punch list walk-through with homeowner',
+        'All punch list items corrected',
+        'Professional house cleaning complete',
+        'Final site cleanup & dumpster removed',
+        'All warranties & manuals collected for owner',
+        'Final walk-through complete',
+        'Keys, remotes & access codes handed over',
+        'Final draws collected',
+      ],
+      costs: [
+        { item: 'Final inspection fees', note: '', cost: 'Varies' },
+        { item: 'Professional cleaning', note: '', cost: 'Est. cost' },
+        { item: 'Punch list contingency', note: '', cost: 'Est. cost' },
+      ],
+    },
+  },
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+
+const params = new URLSearchParams(location.search);
+const PROJECT_ID = params.get('id');
+
+let project = null;
+let taskStates = {};  // { "1-task-0": true, ... }
+let notes = {};       // { "1": "text", ... }
+let currentView = 'customer';
+let saveTimer = null;
+
+if (!PROJECT_ID) { location.href = '/'; }
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+
+async function init() {
+  const [proj, tasks, phaseNotes] = await Promise.all([
+    fetch(`/api/projects/${PROJECT_ID}`).then(r => r.json()),
+    fetch(`/api/projects/${PROJECT_ID}/tasks`).then(r => r.json()),
+    fetch(`/api/projects/${PROJECT_ID}/notes`).then(r => r.json()),
+  ]);
+
+  if (proj.error) { location.href = '/'; return; }
+
+  project = proj;
+  taskStates = tasks;
+  notes = phaseNotes;
+
+  document.title = `${proj.name} — Southern Bay Construction`;
+  document.getElementById('h-name').textContent = proj.name;
+
+  // populate meta fields
+  document.getElementById('m-name').value = proj.name || '';
+  document.getElementById('m-client').value = proj.client_name || '';
+  document.getElementById('m-addr').value = proj.address || '';
+  document.getElementById('m-pm').value = proj.pm || '';
+  document.getElementById('m-start').value = proj.contract_date || '';
+  document.getElementById('m-end').value = proj.est_completion || '';
+
+  // wire meta auto-save
+  document.querySelectorAll('.mg-input').forEach(el => {
+    el.addEventListener('input', () => scheduleSave(el));
+  });
+
+  renderPhases();
+  updateProgress();
+}
+
+// ─── PROGRESS ────────────────────────────────────────────────────────────────
+
+function updateProgress() {
+  const allKeys = PHASES.flatMap(ph =>
+    ph.pm.tasks.map((_, i) => `${ph.id}-task-${i}`)
+  );
+  const total = allKeys.length;
+  const done = allKeys.filter(k => taskStates[k]).length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+}
+
+// ─── VIEW TOGGLE ─────────────────────────────────────────────────────────────
+
+function setView(v) {
+  currentView = v;
+  document.querySelectorAll('.vt-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.view === v);
+  });
+  document.querySelectorAll('.cv').forEach(el => {
+    el.style.display = (v === 'customer' || v === 'both') ? '' : 'none';
+  });
+  document.querySelectorAll('.pm-divider').forEach(el => {
+    el.classList.toggle('show', v === 'both');
+  });
+  document.querySelectorAll('.pm').forEach(el => {
+    el.classList.toggle('show', v === 'pm' || v === 'both');
+  });
+}
+
+// ─── RENDER PHASES ───────────────────────────────────────────────────────────
+
+function renderPhases() {
+  const container = document.getElementById('phases');
+  container.innerHTML = PHASES.map(ph => {
+    const tasksDone = ph.pm.tasks.filter((_, i) => taskStates[`${ph.id}-task-${i}`]).length;
+    const tasksTotal = ph.pm.tasks.length;
+    const complete = tasksDone === tasksTotal && tasksTotal > 0;
+    const phNote = notes[ph.id] || '';
+
+    const paymentsHtml = ph.customer.payments.length ? `
+      <div class="cv-payments">
+        <div class="cv-pay-label">Payment Milestones</div>
+        ${ph.customer.payments.map(p => `
+          <div class="cv-pay-row">
+            <span class="cv-pay-milestone">${p.label}</span>
+            <span class="cv-pay-pct">${p.pct}</span>
+          </div>`).join('')}
+      </div>` : '';
+
+    const tasksHtml = ph.pm.tasks.map((t, i) => {
+      const key = `${ph.id}-task-${i}`;
+      const done = !!taskStates[key];
+      return `<div class="task-item ${done ? 'done' : ''}" onclick="toggleTask('${key}', this)">
+        <div class="task-cb">${done ? '✓' : ''}</div>
+        <div class="task-label">${t}</div>
+      </div>`;
+    }).join('');
+
+    const costsHtml = ph.pm.costs.length ? `
+      <table class="cost-table">
+        <thead><tr><th>Item</th><th style="text-align:right">Amount</th></tr></thead>
+        <tbody>${ph.pm.costs.map(c => `
+          <tr>
+            <td><div class="ct-item">${c.item}</div>${c.note ? `<div class="ct-note">${c.note}</div>` : ''}</td>
+            <td class="ct-cost">${c.cost}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>` : '';
+
+    return `
+    <div class="phase" id="phase-${ph.id}">
+      <div class="phase-head" onclick="togglePhase(${ph.id})">
+        <span class="ph-num">${String(ph.id).padStart(2,'0')}</span>
+        <span class="ph-title">${ph.title}</span>
+        <span class="ph-meta">
+          <span class="ph-tasks">${tasksDone}/${tasksTotal}</span>
+          <span class="ph-check ${complete ? 'complete' : ''}">${complete ? '✓' : ''}</span>
+          <span class="ph-arrow">▼</span>
+        </span>
+      </div>
+      <div class="phase-body">
+
+        <!-- CUSTOMER VIEW -->
+        <div class="cv" style="${currentView === 'pm' ? 'display:none' : ''}">
+          <div class="cv-milestone">
+            <div class="cv-milestone-label">What this phase means for you</div>
+            <div class="cv-milestone-text">${ph.customer.milestone}</div>
+          </div>
+          <div class="cv-what">
+            <div class="cv-what-label">What you'll see on site</div>
+            <div class="cv-what-text">${ph.customer.whatYoullSee}</div>
+          </div>
+          ${paymentsHtml}
+          <div class="cv-note-wrap">
+            <div class="cv-note-label">Phase Notes</div>
+            <textarea class="cv-note" placeholder="Add notes for this phase…"
+              onchange="saveNote(${ph.id}, this.value)">${escHtml(phNote)}</textarea>
+          </div>
+        </div>
+
+        <!-- PM DIVIDER -->
+        <div class="pm-divider ${currentView === 'both' ? 'show' : ''}">
+          <div class="pm-div-line"></div>
+          <span class="pm-div-label">PM Detail</span>
+          <div class="pm-div-line"></div>
+        </div>
+
+        <!-- PM VIEW -->
+        <div class="pm ${(currentView === 'pm' || currentView === 'both') ? 'show' : ''}">
+          <div class="pm-inner">
+            <div class="pm-section">
+              <div class="pm-sec-title">Task Checklist</div>
+              <div class="task-list">${tasksHtml}</div>
+            </div>
+            ${costsHtml ? `
+            <div class="pm-section">
+              <div class="pm-sec-title">Cost Summary</div>
+              ${costsHtml}
+            </div>` : ''}
+          </div>
+        </div>
+
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── ACCORDION ───────────────────────────────────────────────────────────────
+
+function togglePhase(id) {
+  const el = document.getElementById(`phase-${id}`);
+  el.classList.toggle('open');
+}
+
+// ─── TASKS ───────────────────────────────────────────────────────────────────
+
+async function toggleTask(key, el) {
+  const newDone = !taskStates[key];
+  taskStates[key] = newDone;
+  el.classList.toggle('done', newDone);
+  el.querySelector('.task-cb').textContent = newDone ? '✓' : '';
+
+  // update phase header count
+  const parts = key.split('-');
+  const phaseId = parseInt(parts[0]);
+  updatePhaseHeader(phaseId);
+  updateProgress();
+
+  await fetch(`/api/projects/${PROJECT_ID}/tasks`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ task_key: key, done: newDone }),
+  });
+}
+
+function updatePhaseHeader(phaseId) {
+  const ph = PHASES.find(p => p.id === phaseId);
+  if (!ph) return;
+  const done = ph.pm.tasks.filter((_, i) => taskStates[`${phaseId}-task-${i}`]).length;
+  const total = ph.pm.tasks.length;
+  const complete = done === total && total > 0;
+  const el = document.getElementById(`phase-${phaseId}`);
+  if (!el) return;
+  el.querySelector('.ph-tasks').textContent = `${done}/${total}`;
+  const chk = el.querySelector('.ph-check');
+  chk.classList.toggle('complete', complete);
+  chk.textContent = complete ? '✓' : '';
+}
+
+// ─── NOTES ───────────────────────────────────────────────────────────────────
+
+async function saveNote(phaseId, value) {
+  notes[phaseId] = value;
+  await fetch(`/api/projects/${PROJECT_ID}/notes/${phaseId}`, {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ note: value }),
+  });
+}
+
+// ─── META SAVE ───────────────────────────────────────────────────────────────
+
+function scheduleSave(el) {
+  el.classList.remove('saved');
+  el.classList.add('saving');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => doSave(el), 900);
+}
+
+async function doSave(triggerEl) {
+  const fields = {};
+  document.querySelectorAll('.mg-input').forEach(el => {
+    fields[el.dataset.field] = el.value.trim();
+  });
+  await fetch(`/api/projects/${PROJECT_ID}`, {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(fields),
+  });
+  // update header name
+  document.getElementById('h-name').textContent = fields.name || project.name;
+  document.title = `${fields.name || project.name} — Southern Bay Construction`;
+
+  document.querySelectorAll('.mg-input').forEach(el => {
+    el.classList.remove('saving');
+    el.classList.add('saved');
+  });
+  setTimeout(() => {
+    document.querySelectorAll('.mg-input').forEach(el => el.classList.remove('saved'));
+  }, 1500);
+}
+
+// ─── UTIL ────────────────────────────────────────────────────────────────────
+
+function escHtml(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+init();
+</script>
+</body>
+</html>
