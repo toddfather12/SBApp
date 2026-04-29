@@ -3,338 +3,1598 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Southern Bay Construction</title>
+<title>Southern Bay Construction — Project Manager</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --dark:#1A2733; --mid:#2C3E50; --terra:#B85038; --amber:#C49A3C;
-    --cream:#F7F2EB; --sand:#EDE5D8; --white:#FFFFFF; --txt:#2C3440;
-    --txt-m:#5A6A7A; --txt-l:#8A9AB0; --border:#D5C9BC; --green:#3A6A5A;
-    --green-l:#EAF3E8;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);min-height:100vh}
+:root{
+  --dark:#1A2733;--mid:#2C3E50;--terra:#B85038;--amber:#C49A3C;
+  --cream:#F7F2EB;--sand:#EDE5D8;--white:#FFFFFF;
+  --txt:#2C3440;--txt-m:#5A6A7A;--txt-l:#8A9AB0;
+  --border:#D5C9BC;--green:#3A6A5A;--green-l:#EAF3E8;
+  --pm-bg:#F0F6FA;--pm-bdr:#C8DCE8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);min-height:100vh}
 
-  /* HEADER */
-  .header{background:var(--dark);border-bottom:3px solid var(--terra);padding:0 32px;height:60px;
-    display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
-  .h-brand{display:flex;align-items:center;gap:14px}
-  .h-logo{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;
-    color:var(--terra);letter-spacing:2px;text-transform:uppercase}
-  .h-sep{width:1px;height:20px;background:#2C3E50}
-  .h-sub{font-family:'DM Serif Display';font-size:17px;color:var(--white)}
-  .btn-new{background:var(--terra);color:#fff;border:none;border-radius:6px;
-    padding:9px 20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
-    cursor:pointer;transition:background .15s;letter-spacing:.3px}
-  .btn-new:hover{background:#A04030}
+/* ── TOPBAR ── */
+.topbar{background:var(--dark);padding:0 24px;display:flex;align-items:center;
+  justify-content:space-between;height:54px;position:sticky;top:0;z-index:100;
+  border-bottom:3px solid var(--terra);gap:12px}
+.tb-brand{display:flex;align-items:center;gap:12px;cursor:pointer;flex-shrink:0}
+.tb-logo{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;
+  color:var(--terra);letter-spacing:2px}
+.tb-sep{width:1px;height:18px;background:#2C3E50;flex-shrink:0}
+.tb-title{font-family:'DM Serif Display';font-size:16px;color:var(--white);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+.tb-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
 
-  /* PAGE */
-  .page{max-width:1100px;margin:0 auto;padding:36px 24px}
-  .pg-title{font-family:'DM Serif Display';font-size:28px;color:var(--txt);margin-bottom:6px}
-  .pg-sub{font-size:14px;color:var(--txt-m);margin-bottom:32px}
+/* ── BUTTONS ── */
+.btn{padding:6px 14px;border-radius:5px;font-size:12px;font-weight:500;
+  cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s;
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-primary{background:var(--terra);color:#fff}
+.btn-primary:hover{background:#C86048}
+.btn-outline{background:transparent;color:var(--txt-l);border:1px solid #2C3E50}
+.btn-outline:hover{background:#2C3E50;color:#fff}
+.btn-green{background:transparent;color:#5AA882;border:1px solid #3A6A5A}
+.btn-green:hover{background:#1A3028;color:#7AC8A2}
+.btn-danger{background:transparent;color:#D48060;border:1px solid #4A2510}
+.btn-danger:hover{background:#2A1510;color:#E89070}
+.btn-sm{padding:4px 10px;font-size:11px}
+.vtabs{display:flex;gap:3px;background:#0F1C26;padding:4px;border-radius:8px}
+.vtab{padding:5px 13px;border-radius:5px;font-size:12px;font-weight:500;
+  cursor:pointer;border:none;transition:all .15s;font-family:'DM Sans',sans-serif}
+.vtab.on{background:var(--terra);color:#fff}
+.vtab:not(.on){background:transparent;color:var(--txt-l)}
+.vtab:not(.on):hover{color:#fff;background:#2C3E50}
 
-  /* STATS */
-  .stats{display:flex;gap:16px;margin-bottom:36px;flex-wrap:wrap}
-  .stat{background:var(--white);border:1px solid var(--border);border-radius:8px;
-    padding:16px 24px;flex:1;min-width:140px;text-align:center}
-  .stat-n{font-family:'DM Serif Display';font-size:32px;color:var(--terra)}
-  .stat-l{font-size:12px;color:var(--txt-m);margin-top:2px}
+/* ── BREADCRUMB ── */
+.breadcrumb{background:var(--sand);border-bottom:1px solid var(--border);
+  padding:8px 24px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--txt-m)}
+.bc-link{cursor:pointer;color:var(--terra)}
+.bc-link:hover{text-decoration:underline}
+.bc-sep{color:var(--border)}
 
-  /* GRID */
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
+/* ── DASHBOARD ── */
+.dashboard{padding:28px 24px}
+.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.dash-h1{font-family:'DM Serif Display';font-size:26px;color:var(--txt)}
+.project-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.proj-card{background:var(--white);border:1px solid var(--border);border-radius:10px;
+  padding:20px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:12px}
+.proj-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.1);border-color:var(--terra);transform:translateY(-1px)}
+.pc-name{font-family:'DM Serif Display';font-size:18px;color:var(--txt)}
+.pc-meta{display:flex;flex-direction:column;gap:4px}
+.pc-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--txt-m)}
+.pc-icon{color:var(--terra);font-size:11px;width:14px;flex-shrink:0}
+.pc-progress{margin-top:4px}
+.pc-prog-label{display:flex;justify-content:space-between;font-size:10px;color:var(--txt-l);
+  font-family:'IBM Plex Mono',monospace;margin-bottom:4px}
+.pc-prog-bar{height:4px;background:#E8DDD0;border-radius:2px;overflow:hidden}
+.pc-prog-fill{height:100%;background:var(--green);border-radius:2px;transition:width .4s}
+.pc-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.badge{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;
+  padding:2px 8px;border-radius:3px;white-space:nowrap}
+.badge-pending{background:#FFF8E8;color:#8A6A00;border:1px solid #E8C84A}
+.badge-signed{background:var(--green-l);color:var(--green);border:1px solid #B8D8C8}
+.empty-state{text-align:center;padding:60px 24px;color:var(--txt-m)}
+.empty-icon{font-size:40px;margin-bottom:16px}
+.empty-h{font-family:'DM Serif Display';font-size:22px;color:var(--txt);margin-bottom:8px}
+.empty-p{font-size:14px;line-height:1.6;margin-bottom:24px}
 
-  /* PROJECT CARD */
-  .card{background:var(--white);border:1px solid var(--border);border-radius:10px;
-    overflow:hidden;cursor:pointer;transition:box-shadow .2s,transform .15s;text-decoration:none;color:inherit}
-  .card:hover{box-shadow:0 6px 28px rgba(0,0,0,.1);transform:translateY(-2px)}
-  .card-head{background:var(--dark);padding:16px 20px;display:flex;align-items:flex-start;
-    justify-content:space-between;gap:10px}
-  .card-name{font-family:'DM Serif Display';font-size:18px;color:var(--white);line-height:1.3}
-  .card-client{font-size:12px;color:#6A8AA0;margin-top:3px}
-  .card-status{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;
-    padding:3px 9px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px}
-  .s-active{background:#0F2A1A;color:#5AAA80;border:1px solid #204030}
-  .s-complete{background:#0A1A28;color:#4A88AA;border:1px solid #1A3040}
-  .card-body{padding:16px 20px}
-  .card-row{display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap}
-  .card-field{flex:1;min-width:90px}
-  .cf-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;
-    color:var(--terra);margin-bottom:2px}
-  .cf-val{font-size:13px;color:var(--txt);font-weight:500}
-  .cf-val.empty{color:var(--txt-l);font-style:italic}
+/* ── PROJECT FORM ── */
+.form-wrap{max-width:580px;margin:32px auto;background:var(--white);
+  border:1px solid var(--border);border-radius:10px;padding:32px;
+  box-shadow:0 4px 20px rgba(0,0,0,.06)}
+.form-h{font-family:'DM Serif Display';font-size:24px;color:var(--txt);margin-bottom:8px}
+.form-sub{font-size:13px;color:var(--txt-m);margin-bottom:28px;line-height:1.5}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-full{grid-column:1/-1}
+.form-field{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:10px;font-weight:600;color:var(--terra);text-transform:uppercase;letter-spacing:1.2px}
+.form-input{font-family:'DM Sans',sans-serif;font-size:14px;color:var(--txt);
+  background:var(--sand);border:1px solid var(--border);border-radius:6px;
+  padding:9px 12px;outline:none;transition:border-color .15s;width:100%}
+.form-input:focus{border-color:var(--terra);background:var(--white)}
+.form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;
+  padding-top:20px;border-top:1px solid var(--border)}
 
-  /* PROGRESS */
-  .prog-wrap{margin-top:4px}
-  .prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
-  .prog-label{font-size:11px;color:var(--txt-m)}
-  .prog-pct{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--terra);font-weight:500}
-  .prog-bar{height:5px;background:#EDE5D8;border-radius:3px;overflow:hidden}
-  .prog-fill{height:100%;background:var(--terra);border-radius:3px;transition:width .3s}
+/* ── PROJECT META BAR ── */
+.proj-meta{background:var(--sand);border-bottom:1px solid var(--border);
+  padding:10px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.pm-field{display:flex;align-items:center;gap:6px}
+.pm-label{font-size:10px;font-weight:600;color:var(--terra);text-transform:uppercase;letter-spacing:1.2px}
+.pm-val{font-size:13px;font-weight:500;color:var(--txt)}
+.role-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;
+  margin-left:auto;padding:3px 10px;border-radius:4px}
+.role-pm{background:rgba(184,80,56,.12);color:var(--terra);border:1px solid rgba(184,80,56,.3)}
+.role-cu{background:#F0F6FA;color:#4A8AAA;border:1px solid var(--pm-bdr)}
 
-  /* EMPTY STATE */
-  .empty{text-align:center;padding:80px 24px;color:var(--txt-m)}
-  .empty-icon{font-size:48px;margin-bottom:16px;opacity:.4}
-  .empty-title{font-family:'DM Serif Display';font-size:22px;color:var(--txt);margin-bottom:8px}
-  .empty-sub{font-size:14px;line-height:1.6;max-width:380px;margin:0 auto 24px}
+/* ── BUDGET PANEL ── */
+.budget-panel{background:var(--dark);padding:16px 24px}
+.bp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.bp-title{font-family:'DM Serif Display';font-size:17px;color:var(--white)}
+.bp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.bp-stat{text-align:center}
+.bp-num{font-family:'DM Serif Display';font-size:24px;color:var(--terra)}
+.bp-num.green{color:#5AA882}
+.bp-num.amber{color:#D4A840}
+.bp-lbl{font-size:10px;color:#6A8AA0;margin-top:2px;font-family:'IBM Plex Mono',monospace}
 
-  /* MODAL */
-  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;
-    display:none;align-items:center;justify-content:center;padding:20px}
-  .overlay.show{display:flex}
-  .modal{background:var(--white);border-radius:12px;width:100%;max-width:520px;
-    box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden}
-  .modal-head{background:var(--dark);padding:20px 24px;border-bottom:2px solid var(--terra)}
-  .modal-title{font-family:'DM Serif Display';font-size:20px;color:var(--white)}
-  .modal-sub{font-size:12px;color:#6A8AA0;margin-top:3px}
-  .modal-body{padding:24px}
-  .frow{display:flex;gap:14px;margin-bottom:16px}
-  .frow:last-child{margin-bottom:0}
-  .fgrp{display:flex;flex-direction:column;flex:1}
-  label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;
-    color:var(--txt-m);margin-bottom:6px}
-  input[type=text],input[type=date]{font-family:'DM Sans',sans-serif;font-size:14px;
-    border:1.5px solid var(--border);border-radius:6px;padding:9px 12px;
-    outline:none;color:var(--txt);background:var(--white);width:100%;transition:border-color .15s}
-  input:focus{border-color:var(--terra)}
-  .modal-foot{padding:16px 24px;border-top:1px solid var(--border);
-    display:flex;justify-content:flex-end;gap:10px;background:var(--sand)}
-  .btn-cancel{background:none;border:1.5px solid var(--border);border-radius:6px;
-    padding:9px 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;
-    color:var(--txt-m);cursor:pointer;transition:all .15s}
-  .btn-cancel:hover{border-color:var(--txt-m);color:var(--txt)}
-  .btn-create{background:var(--terra);color:#fff;border:none;border-radius:6px;
-    padding:9px 22px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
-    cursor:pointer;transition:background .15s}
-  .btn-create:hover{background:#A04030}
+/* ── CHANGE ORDERS PANEL ── */
+.co-panel{margin:16px 24px 0;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.co-panel-header{background:var(--dark);padding:10px 18px;display:flex;
+  align-items:center;justify-content:space-between}
+.co-panel-title{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;
+  color:#6A90A8;letter-spacing:2px;text-transform:uppercase}
+.co-list{display:flex;flex-direction:column}
+.co-item{padding:14px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-start;gap:12px}
+.co-item:last-child{border-bottom:none}
+.co-item.pending{background:#FFFDF5}
+.co-item.signed{background:#F5FBF7}
+.co-item.rejected{background:#FEF9F8}
+.co-status-pill{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;
+  padding:3px 8px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.csp-pending{background:#FFF3CC;color:#8A6A00;border:1px solid #E8C84A}
+.csp-signed{background:var(--green-l);color:var(--green);border:1px solid #B8D8C8}
+.csp-rejected{background:#FEE8E0;color:var(--terra);border:1px solid #E8C0B0}
+.co-body{flex:1;min-width:0}
+.co-name{font-size:13px;font-weight:600;color:var(--txt);margin-bottom:3px}
+.co-desc{font-size:12px;color:var(--txt-m);line-height:1.5;margin-bottom:8px}
+.co-meta-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.co-amount{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--terra)}
+.co-meta-txt{font-size:11px;color:var(--txt-l)}
+.co-sig-line{font-size:11px;color:var(--green);font-weight:500;margin-top:5px}
+.co-rej-line{font-size:11px;color:var(--terra);margin-top:5px}
+.co-empty{padding:20px 18px;text-align:center;font-size:13px;color:var(--txt-l)}
 
-  /* CARD ACTIONS */
-  .card-foot{padding:10px 20px;border-top:1px solid var(--border);background:var(--sand);
-    display:flex;justify-content:space-between;align-items:center}
-  .card-date{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txt-l)}
-  .card-del{font-size:11px;color:var(--txt-l);background:none;border:none;cursor:pointer;
-    padding:3px 8px;border-radius:4px;transition:all .15s;font-family:'DM Sans',sans-serif}
-  .card-del:hover{background:#FEE;color:#C04030}
+/* ── LEGEND ── */
+.legend{padding:8px 24px;display:flex;gap:18px;align-items:center;
+  background:var(--cream);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--txt-m)}
+.ld{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.ld-t{background:var(--amber)} .ld-i{background:#9878D0} .ld-g{background:var(--green)}
 
-  @media(max-width:600px){
-    .page{padding:24px 16px}
-    .frow{flex-direction:column;gap:12px}
-    .header{padding:0 16px}
-    .h-sub{display:none}
-  }
+/* ── PHASE CARDS ── */
+.phases{padding:16px 24px 8px;display:flex;flex-direction:column;gap:10px}
+.phase{border:1px solid var(--border);border-radius:8px;overflow:hidden;
+  background:var(--white);transition:box-shadow .2s}
+.phase:hover{box-shadow:0 2px 14px rgba(0,0,0,.08)}
+.phase.open{box-shadow:0 4px 22px rgba(0,0,0,.11)}
+.strip{display:flex;align-items:center;gap:14px;padding:0 18px;height:54px;
+  cursor:pointer;user-select:none;background:var(--dark);
+  border-bottom:2px solid transparent;transition:background .15s,border-color .15s}
+.strip:hover{background:#20323F}
+.phase.open .strip{border-bottom-color:var(--terra)}
+.pnum{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;
+  color:var(--terra);background:rgba(184,80,56,.18);border:1px solid rgba(184,80,56,.35);
+  padding:4px 11px;border-radius:4px;letter-spacing:1px;white-space:nowrap;flex-shrink:0}
+.ptitle{font-family:'DM Serif Display';font-size:17px;color:var(--white);
+  flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pdur{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#6A8AA0;
+  background:#0F1C26;padding:3px 9px;border-radius:4px;white-space:nowrap;flex-shrink:0}
+.strip-flags{display:flex;gap:5px;flex-shrink:0}
+.sf{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;
+  padding:3px 7px;border-radius:3px;white-space:nowrap}
+.sf-t{background:#2A2010;color:#D4A840;border:1px solid #4A3A10}
+.sf-i{background:#1A1020;color:#A880D8;border:1px solid #3A2050}
+.sf-p{background:#102018;color:#5AA882;border:1px solid #204030}
+.sf-co{background:#2A2208;color:#D4A840;border:1px solid #4A3A10}
+.sf-ph{background:#101830;color:#6888CC;border:1px solid #203060}
+.chev{color:#4A6A7A;font-size:11px;flex-shrink:0;transition:transform .2s}
+.phase.open .chev{transform:rotate(180deg);color:var(--terra)}
+
+/* ── COLUMNS ── */
+.pcols{display:none}
+.phase.open .pcols{display:grid}
+.pcols[data-v="both"]{grid-template-columns:1fr 1fr}
+.pcols[data-v="customer"]{grid-template-columns:1fr}
+.pcols[data-v="pm"]{grid-template-columns:1fr}
+.ch{padding:8px 18px;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;
+  letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.ch.cu{background:#FDFAF6;color:var(--terra);border-bottom:1px solid #EDE8E2;border-right:1px solid var(--border)}
+.ch.pm{background:#EEF4F8;color:#4A8AAA;border-bottom:1px solid var(--pm-bdr)}
+.cdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.cdot.cu{background:var(--terra)} .cdot.pm{background:#4A8AAA}
+.cb{padding:16px 18px 20px}
+.cb.cu{background:var(--white);border-right:1px solid var(--border)}
+.cb.pm{background:var(--pm-bg)}
+
+/* ── CONTENT BLOCKS ── */
+.blk{margin-bottom:16px} .blk:last-child{margin-bottom:0}
+.blab{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px}
+.blab.cu{color:var(--terra)} .blab.pm{color:#3A7A9A}
+.btxt{font-size:13px;color:var(--txt-m);line-height:1.65}
+.decs{display:flex;flex-direction:column}
+.dec{display:flex;gap:9px;align-items:flex-start;font-size:13px;color:var(--txt-m);
+  padding:6px 0;border-bottom:1px dashed #E8DDD0;line-height:1.45}
+.dec:last-child{border-bottom:none}
+.da{color:var(--terra);flex-shrink:0;font-size:13px;margin-top:1px}
+.comm{display:flex;gap:10px;align-items:flex-start;padding:7px 10px;border-radius:5px;
+  background:var(--green-l);border-left:3px solid var(--green);
+  margin-bottom:6px;font-size:12.5px;color:var(--txt)}
+.cf{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;
+  color:var(--green);flex-shrink:0;padding-top:2px;min-width:60px}
+.pay{display:flex;align-items:flex-start;gap:8px;margin-top:6px;
+  background:var(--green-l);border:1px solid #B8D8C8;border-radius:5px;
+  padding:8px 12px;font-size:12.5px;font-weight:600;color:var(--green);line-height:1.45}
+.mstn{display:flex;gap:8px;align-items:flex-start;margin-top:10px;
+  padding:7px 10px;background:#F0F8F4;border-radius:5px;
+  border-left:3px solid var(--green);font-size:12.5px;font-weight:500;
+  color:var(--green);line-height:1.4}
+
+/* ── DECISION ITEMS (customer interactive) ── */
+.dec-item{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;
+  border-radius:6px;border:1px solid var(--border);background:var(--white);
+  margin-bottom:6px;font-size:13px;color:var(--txt-m);cursor:pointer;transition:all .1s}
+.dec-item:hover{border-color:#B8C8B8;background:#F8FCF8}
+.dec-item.confirmed{background:var(--green-l);border-color:#B8D8C8;color:var(--txt)}
+.dec-cb{width:17px;height:17px;border-radius:3px;flex-shrink:0;margin-top:1px;
+  border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;background:white;transition:all .12s;color:white}
+.dec-item.confirmed .dec-cb{background:var(--green);border-color:var(--green)}
+.dec-text{flex:1}
+
+/* ── TASKS ── */
+.tlist{display:flex;flex-direction:column;gap:4px}
+.task{display:flex;align-items:flex-start;gap:9px;padding:7px 10px;border-radius:5px;
+  font-size:13px;line-height:1.4;color:var(--txt);border:1px solid transparent;
+  cursor:pointer;transition:background .1s}
+.task:hover{background:rgba(255,255,255,.7)}
+.task.trig{background:#FFFBEE;border-color:#E8C84A}
+.task.trig:hover{background:#FFFAE0}
+.task.insp{background:#F0F4FF;border-color:#B0C0E8}
+.task.done{opacity:.55} .task.done .tt{text-decoration:line-through;color:var(--txt-l)}
+.tcb{width:17px;height:17px;border-radius:3px;flex-shrink:0;margin-top:1px;
+  border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;background:white;transition:all .12s;color:white}
+.task.done .tcb{background:var(--green);border-color:var(--green)}
+.tt{flex:1}
+.tbadge{font-family:'IBM Plex Mono',monospace;font-size:9px;flex-shrink:0;
+  padding:2px 6px;border-radius:3px;margin-top:2px;white-space:nowrap}
+.tb-t{background:#FFF3CC;color:#8A6A00}
+.tb-i{background:#E8EEFF;color:#3A5AB8}
+
+/* ── COST TABLE ── */
+.ctable{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
+.ctable th{text-align:left;font-size:9px;font-weight:600;text-transform:uppercase;
+  letter-spacing:1px;color:#4A8AAA;padding:4px 8px;border-bottom:1px solid var(--pm-bdr);
+  background:#E8F2F8}
+.ctable th:last-child{text-align:right}
+.ctable td{padding:5px 8px;border-bottom:1px solid #DDE8F0;color:var(--txt-m);vertical-align:top}
+.ctable td:last-child{text-align:right;font-family:'IBM Plex Mono',monospace;
+  font-size:11px;color:var(--txt);white-space:nowrap}
+.ctable tr:last-child td{border-bottom:none}
+.cref{font-size:10px;color:var(--txt-l);font-style:italic}
+.stags{display:flex;flex-wrap:wrap;gap:5px}
+.stag{font-family:'IBM Plex Mono',monospace;font-size:10px;background:#E4EEF6;
+  color:#3A5870;padding:3px 9px;border-radius:3px;border:1px solid #C4D8E6}
+
+/* ── PHOTOS ── */
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-top:8px}
+.photo-thumb{position:relative;border-radius:6px;overflow:hidden;
+  aspect-ratio:1;cursor:pointer;border:1px solid var(--border);background:#F0F0F0}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-thumb:hover .photo-del{opacity:1}
+.photo-del{opacity:0;position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);
+  color:#fff;border:none;border-radius:3px;width:22px;height:22px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;cursor:pointer;transition:opacity .15s}
+.photo-caption{font-size:10px;color:var(--txt-l);margin-top:3px;text-align:center;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.photo-add{border:2px dashed var(--border);border-radius:6px;aspect-ratio:1;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .15s;background:transparent;font-size:11px;
+  color:var(--txt-l);gap:4px;width:100%}
+.photo-add:hover{border-color:var(--terra);color:var(--terra);background:#FEF5F2}
+
+/* ── SUMMARY ── */
+.summary{margin:8px 24px 32px;padding:20px 24px;background:var(--dark);
+  border-radius:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.ss{text-align:center}
+.sn{font-family:'DM Serif Display';font-size:28px;color:var(--terra)}
+.sl{font-size:11px;color:#6A8AA0;margin-top:3px}
+.sf2{grid-column:1/-1;font-size:11px;color:#4A6A7A;text-align:center;
+  font-family:'IBM Plex Mono',monospace;border-top:1px solid #2C3E50;
+  padding-top:12px;margin-top:4px}
+
+/* ── MODALS ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+  z-index:999;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:12px;padding:28px 32px;
+  max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);
+  max-height:90vh;overflow-y:auto}
+.modal h3{font-family:'DM Serif Display';font-size:22px;color:var(--txt);margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--txt-m);margin-bottom:22px;line-height:1.5}
+.modal-body{display:flex;flex-direction:column;gap:14px;margin-bottom:24px}
+.modal-btns{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.co-review-box{background:var(--sand);border:1px solid var(--border);border-radius:8px;
+  padding:16px;margin-bottom:20px}
+.co-review-title{font-family:'DM Serif Display';font-size:18px;color:var(--txt);margin-bottom:12px}
+.co-review-row{display:flex;justify-content:space-between;align-items:flex-start;
+  font-size:13px;color:var(--txt-m);padding:6px 0;border-bottom:1px dashed #E8DDD0;gap:12px}
+.co-review-row:last-child{border-bottom:none}
+.co-review-val{font-weight:600;color:var(--txt);text-align:right;flex-shrink:0}
+.co-amount-display{font-family:'DM Serif Display';font-size:32px;color:var(--terra);
+  text-align:center;padding:16px 0 8px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);
+  background:var(--dark);color:#fff;padding:10px 22px;border-radius:6px;
+  font-size:13px;z-index:9999;transition:transform .3s ease;white-space:nowrap;
+  border-left:3px solid var(--green);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ── PROGRESS BAR (overall) ── */
+.overall-progress{background:var(--sand);border-bottom:1px solid var(--border);
+  padding:8px 24px;display:flex;align-items:center;gap:14px}
+.op-label{font-size:10px;font-weight:600;color:var(--terra);text-transform:uppercase;
+  letter-spacing:1.2px;white-space:nowrap}
+.op-bar-wrap{flex:1;height:5px;background:#DDD5C8;border-radius:3px;overflow:hidden}
+.op-bar-fill{height:100%;background:var(--green);border-radius:3px;transition:width .4s}
+.op-count{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txt-m);white-space:nowrap}
+
+/* ── CUSTOMER PORTAL HEADER ── */
+.cu-welcome{background:linear-gradient(135deg,#1A2733 0%,#2C3E50 100%);
+  padding:24px;border-bottom:3px solid var(--terra);margin-bottom:0}
+.cu-welcome-inner{max-width:700px}
+.cu-welcome-label{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;
+  color:var(--terra);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.cu-welcome-title{font-family:'DM Serif Display';font-size:26px;color:var(--white);margin-bottom:8px}
+.cu-welcome-sub{font-size:13px;color:#6A8AA0;line-height:1.6}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .pcols[data-v="both"]{grid-template-columns:1fr}
+  .cb.cu{border-right:none;border-bottom:1px solid var(--border)}
+  .ch.cu{border-right:none}
+  .phases{padding:12px 14px 8px}
+  .summary{grid-template-columns:repeat(2,1fr);margin:0 14px 24px}
+  .topbar,.proj-meta,.legend,.breadcrumb,.overall-progress{padding-left:14px;padding-right:14px}
+  .co-panel{margin-left:14px;margin-right:14px}
+  .budget-panel{padding:14px}
+  .bp-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .dashboard{padding:16px 14px}
+  .project-grid{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .tb-title{display:none}
+  .tb-right{gap:5px}
+  .btn-sm{padding:4px 8px;font-size:10px}
+  .vtab{padding:4px 8px;font-size:11px}
+}
+@media print{
+  .topbar,.breadcrumb,.legend,.overall-progress,.co-panel,.budget-panel,
+  .strip-flags,.chev,.pcols .pm,.summary,.modal-overlay{display:none!important}
+  body{background:white}
+  .phases{padding:0;gap:8px}
+  .phase{box-shadow:none;border:1px solid #ccc;break-inside:avoid}
+  .pcols[data-v="both"]{grid-template-columns:1fr!important}
+  .cb.cu{border-right:none}
+  .strip{background:#1A2733!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 </style>
 </head>
 <body>
+<div id="app"></div>
 
-<div class="header">
-  <div class="h-brand">
-    <span class="h-logo">Southern Bay Construction</span>
-    <div class="h-sep"></div>
-    <span class="h-sub">Project Manager</span>
-  </div>
-  <button class="btn-new" onclick="openModal()">+ New Project</button>
-</div>
-
-<div class="page">
-  <div class="pg-title">Active Projects</div>
-  <div class="pg-sub" id="pg-sub">Loading...</div>
-
-  <div class="stats" id="stats-row"></div>
-  <div class="grid" id="grid"></div>
-</div>
-
-<!-- NEW PROJECT MODAL -->
-<div class="overlay" id="overlay" onclick="closeModal(event)">
+<!-- CO CREATE MODAL -->
+<div class="modal-overlay" id="co-modal">
   <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title">New Project</div>
-      <div class="modal-sub">Creates a fresh 10-phase timeline</div>
-    </div>
+    <h3>Add Change Order</h3>
+    <p class="modal-sub">Document a scope change. The customer will see it in their portal and can sign off with a timestamp.</p>
     <div class="modal-body">
-      <div class="frow">
-        <div class="fgrp" style="flex:2">
-          <label>Project Name *</label>
-          <input type="text" id="f-name" placeholder="Smith Residence — Custom Home Build">
-        </div>
+      <div class="form-field">
+        <label class="form-label">Phase</label>
+        <select class="form-input" id="co-phase"></select>
       </div>
-      <div class="frow">
-        <div class="fgrp">
-          <label>Client Name</label>
-          <input type="text" id="f-client" placeholder="John & Jane Smith">
-        </div>
-        <div class="fgrp">
-          <label>Property Address</label>
-          <input type="text" id="f-addr" placeholder="123 Main St, Mobile, AL">
-        </div>
+      <div class="form-field">
+        <label class="form-label">Title *</label>
+        <input class="form-input" id="co-title" placeholder="e.g. Additional windows in master bedroom">
       </div>
-      <div class="frow">
-        <div class="fgrp">
-          <label>Contract Date</label>
-          <input type="date" id="f-start">
-        </div>
-        <div class="fgrp">
-          <label>Est. Completion</label>
-          <input type="date" id="f-end">
-        </div>
-        <div class="fgrp">
-          <label>Project Manager</label>
-          <input type="text" id="f-pm" placeholder="Damian">
-        </div>
+      <div class="form-field">
+        <label class="form-label">Description</label>
+        <textarea class="form-input" id="co-desc" rows="3"
+          placeholder="Describe the change, the reason, and any impact on schedule..."
+          style="resize:vertical"></textarea>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Amount ($) — enter 0 for no-cost change</label>
+        <input class="form-input" id="co-amount" type="number" min="0" step="0.01" placeholder="0.00">
       </div>
     </div>
-    <div class="modal-foot">
-      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-create" onclick="createProject()">Create Project</button>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal('co-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitCO()">Add Change Order</button>
     </div>
   </div>
 </div>
+
+<!-- CO SIGN MODAL -->
+<div class="modal-overlay" id="sign-modal">
+  <div class="modal">
+    <h3 id="sign-modal-title">Review Change Order</h3>
+    <p class="modal-sub">Review the details below carefully. Your signature is legally binding.</p>
+    <div id="sign-modal-detail"></div>
+    <div class="modal-body">
+      <div class="form-field">
+        <label class="form-label">Full Name (electronic signature)</label>
+        <input class="form-input" id="sign-name" placeholder="Type your full name to sign">
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-danger" onclick="rejectCO()">Decline</button>
+      <button class="btn btn-outline" onclick="closeModal('sign-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="signCO()">Sign &amp; Approve</button>
+    </div>
+  </div>
+</div>
+
+<!-- PHOTO UPLOAD MODAL -->
+<div class="modal-overlay" id="photo-modal">
+  <div class="modal">
+    <h3 id="photo-modal-title">Add Photo</h3>
+    <p class="modal-sub" id="photo-modal-sub">Select a photo to attach to this phase. Images are resized automatically.</p>
+    <div class="modal-body">
+      <div class="form-field">
+        <label class="form-label">Photo *</label>
+        <input type="file" id="photo-file" accept="image/*" class="form-input" style="padding:6px">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Caption (optional)</label>
+        <input class="form-input" id="photo-caption" placeholder="e.g. Framing complete — east elevation">
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal('photo-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitPhoto()">Upload Photo</button>
+    </div>
+  </div>
+</div>
+
+<!-- PHOTO LIGHTBOX -->
+<div class="modal-overlay" id="lightbox" onclick="closeModal('lightbox')">
+  <img id="lightbox-img" src="" alt="" style="max-width:90vw;max-height:90vh;border-radius:8px;object-fit:contain">
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-const TOTAL_TASKS = 65; // approximate across all 10 phases
+// ════════════════════════════════════════════════════════════
+//  PHASE DEFINITIONS  (Edwards cost sheet integrated · v2.0)
+// ════════════════════════════════════════════════════════════
+const fmt = n => '$'+Number(n).toLocaleString();
 
-async function load() {
-  const projects = await fetch('/api/projects').then(r => r.json());
+const PHASES = [
+{
+  id:1, name:"Pre-Construction & Planning", dur:"Days 1–14", flags:["trigger"],
+  cu:{
+    what:"Before a shovel hits the ground, we've reviewed your plans, confirmed your lot, and put every long-lead-time order in motion. You'll know exactly what we need from you and when.",
+    decisions:[
+      "Confirm architectural plans are finalized and permit-ready",
+      "Confirm lender contact and construction loan draw schedule",
+      "Window selections — style, color, manufacturer — needed within 5 days of contract",
+      "Exterior door selections — confirm with Damian before ordering",
+      "Truss design approval — engineered trusses require 3–4 week lead time",
+      "Any specialty or custom framing items — identify now"
+    ],
+    comms:[
+      {f:"Day 1",   t:"Kickoff email: project schedule, PM contact, open decisions list"},
+      {f:"Day 3",   t:"Window / door / truss selection follow-up — PM reaches out if not received"},
+      {f:"Weekly",  t:"Friday update throughout pre-construction"}
+    ],
+    pay:null,
+    mstn:"Plans reviewed. Permit submitted. Windows, doors, and trusses ordered."
+  },
+  pm:{
+    tasks:[
+      {t:"Conduct site visit — assess cleaning, stumps, muck, scraping, bush hog needs",fl:"trig",b:"site cost variable"},
+      {t:"Review plans with Damian — confirm scope, spec, and bid accuracy before contract"},
+      {t:"Stake out: confirm property lines, setbacks, building footprint with survey crew",fl:"trig",b:"survey required"},
+      {t:"Submit permit application — include all required engineering and drawings",fl:"insp",b:"jurisdiction varies"},
+      {t:"ORDER WINDOWS — 4–6 week lead time. Decision needed within 5 days. Do not wait.",fl:"trig",b:"4–6 wk lead"},
+      {t:"ORDER exterior doors — confirm lead time with Pat (ref: $9,486 / $13,350 w/ windows)",fl:"trig",b:"verify lead time"},
+      {t:"ORDER trusses — engineered drawings required, 3–4 week lead time",fl:"trig",b:"3–4 wk lead"},
+      {t:"Identify special framing items and order accordingly"}
+    ],
+    costs:[
+      {item:"Plans / architectural drawings",amt:5500,note:"Adjust per project"},
+      {item:"Engineering (structural)",amt:null,note:"Quote per project"},
+      {item:"Permit",amt:1500,note:"Varies by jurisdiction"},
+      {item:"Builders Risk Insurance",amt:2500,note:"Confirm with carrier"},
+      {item:"Portable toilet",amt:500,note:"Full project duration"},
+      {item:"Dumpster",amt:2000,note:"Adjust for project size"}
+    ],
+    subs:["Survey crew","Permit expediter (if needed)"]
+  }
+},
+{
+  id:2, name:"Site Prep & Temporary Services", dur:"Weeks 2–3", flags:["trigger"],
+  cu:{
+    what:"The lot is prepared and temporary utilities are established. You may not see dramatic activity yet, but the site is being set up correctly.",
+    decisions:[
+      "Confirm any lot grading preferences or drainage concerns",
+      "Septic system location and design approval (if applicable)"
+    ],
+    comms:[
+      {f:"Milestone",t:"Site prep complete — photo update, confirm ready for foundation"},
+      {f:"Weekly",   t:"Friday update"}
+    ],
+    pay:null,
+    mstn:"Lot cleared. Temp power and water established. Dumpster and toilet on site."
+  },
+  pm:{
+    tasks:[
+      {t:"Execute lot clearing — trees, stumps, scraping, bush hog per site visit"},
+      {t:"Establish temporary power (temp pole) — coordinate with power company (1–2 weeks)",fl:"trig",b:"schedule early"},
+      {t:"Establish temporary water access"},
+      {t:"Dumpster on site and toilet placed"},
+      {t:"Confirm septic design and permitting if applicable"},
+      {t:"Confirm fill/dirt delivery schedule for pad prep",fl:"trig",b:"coordinate with pad"}
+    ],
+    costs:[
+      {item:"Fill lot / site prep",amt:8000,note:"Edwards ref — adjust for actual clearing scope"},
+      {item:"Septic system",amt:null,note:"Quote per site — not in Edwards ref"},
+      {item:"Water / well",amt:null,note:"Quote per site — not in Edwards ref"}
+    ],
+    subs:["Lot clearing crew","Temp power contractor","Septic contractor (if applicable)"]
+  }
+},
+{
+  id:3, name:"Foundation & Slab", dur:"Weeks 3–6", flags:["trigger","insp","pay"],
+  cu:{
+    what:"Your home's foundation is formed and poured. By the end you can walk the footprint of your home for the first time. Your first payment draw happens here.",
+    decisions:[
+      "Garage slab height confirmation — affects driveway grade and drainage",
+      "Any last-minute changes to footprint or room placement before forms are set"
+    ],
+    comms:[
+      {f:"Milestone",t:"Photo of completed slab — first look at your home's footprint"},
+      {f:"Payment",  t:"Payment #1 invoice sent to you and lender on pour day"},
+      {f:"Weekly",   t:"Friday update — flag any weather or soil surprises immediately"}
+    ],
+    pay:"Payment #1 due at slab pour. Invoice sent to client and lender simultaneously.",
+    mstn:"Slab poured and cured. Pre-pour inspection passed. Ready for framing."
+  },
+  pm:{
+    tasks:[
+      {t:"Grade and compact pad — bring fill to correct elevation"},
+      {t:"Form pad — set forms to plan dimensions"},
+      {t:"Pad rough-in: under-slab plumbing, electrical conduit stub-outs, HVAC as needed"},
+      {t:"Verify all rough-ins in correct location before inspection",fl:"insp",b:"pre-pour required"},
+      {t:"Pre-pour inspection — do not pour without passing this",fl:"insp",b:"jurisdiction required"},
+      {t:"Pour concrete — confirm crew and pump truck availability",fl:"trig",b:"weather window"},
+      {t:"Photo pour — send Payment #1 invoice to client AND lender same day"},
+      {t:"Allow 7-day minimum cure before framing crew mobilizes",fl:"trig",b:"7-day cure"},
+      {t:"Confirm frame lumber delivery timing — deliver after slab cure"}
+    ],
+    costs:[
+      {item:"Slab (labor + concrete)",amt:28000,note:"Edwards reference"},
+      {item:"Frame lumber package",amt:40000,note:"Edwards ref · Net 30 — hold payment until returns confirmed"}
+    ],
+    subs:["Excavation/grading crew","Concrete crew","Plumbing (under-slab rough-in)"]
+  }
+},
+{
+  id:4, name:"Framing & Roof", dur:"Weeks 6–11", flags:["trigger","insp"],
+  cu:{
+    what:"Walls rise, the roof takes shape, and by the end your home is dried in and protected from weather. You'll see room sizes in three dimensions for the first time. Walk-throughs are encouraged.",
+    decisions:[
+      "Confirm window placement in framing before walls are closed in — last chance",
+      "Confirm any structural changes from plans before framing begins"
+    ],
+    comms:[
+      {f:"Milestone",t:"Photo update when walls are up — first look at your floor plan in 3D"},
+      {f:"Walk",     t:"Walk-through invited once framing is complete — see the space before it closes"},
+      {f:"Weekly",   t:"Friday update with framing progress photos"}
+    ],
+    pay:null,
+    mstn:"House dried in. Windows and exterior doors installed. Fortification photos taken."
+  },
+  pm:{
+    tasks:[
+      {t:"Deliver frame lumber — confirm vendor, hold full payment until returns resolved"},
+      {t:"Verify windows and exterior doors are ON SITE before framing crew starts",fl:"trig",b:"must arrive first"},
+      {t:"Framing crew on site — check in daily for first three days"},
+      {t:"Nail pattern inspection — schedule when framing is at appropriate stage",fl:"insp",b:"strapping/nailing"},
+      {t:"Take fortification photos during framing — nail pattern, strapping, blocking",fl:"trig",b:"fortification req'd"},
+      {t:"Trusses delivered and set — confirm delivery window with manufacturer",fl:"trig",b:"verify arrival"},
+      {t:"Cover slab if needed during framing to protect from debris"},
+      {t:"Roofing crew on site after roof deck is sheathed"},
+      {t:"Take fortification photos on roof — decking, clips, ridge vent placement",fl:"trig",b:"fortification req'd"},
+      {t:"NOTE: Final framing inspection CANNOT happen until MEP rough-ins complete",fl:"insp",b:"inspection sequence"},
+      {t:"Termite treatment — schedule after slab and before framing closes in",fl:"trig",b:"pre-frame required"}
+    ],
+    costs:[
+      {item:"Framer (labor)",amt:39000,note:"Edwards reference"},
+      {item:"Trusses",amt:null,note:"Quote per project"},
+      {item:"Roofing",amt:15700,note:"ML Roofing — Edwards reference"},
+      {item:"Termite treatment",amt:850,note:"Edwards reference"}
+    ],
+    subs:["Framing crew","Roofing crew","Termite treatment company"]
+  }
+},
+{
+  id:5, name:"MEP Rough-In & Inspections", dur:"Weeks 10–14", flags:["insp"],
+  cu:{
+    what:"Plumbing, electrical, and HVAC are roughed in before drywall covers them. Every outlet, light fixture, vent, and pipe is placed now. This is the last chance to move anything. A pre-sheetrock walk is strongly encouraged.",
+    decisions:[
+      "Electrical panel location and service size confirmation",
+      "All light fixture locations, ceiling fan placements, and outlet counts",
+      "HVAC zone layout — single vs. dual zone",
+      "Fireplace type and location (if applicable)",
+      "Smart-home pre-wire: speakers, security cameras, ethernet, EV charger"
+    ],
+    comms:[
+      {f:"Walk",   t:"Pre-sheetrock walk — strongly recommended, review all rough-in locations with PM"},
+      {f:"Weekly", t:"Friday update"}
+    ],
+    pay:null,
+    mstn:"All rough-in inspections passed. Final framing inspection complete. Ready for insulation."
+  },
+  pm:{
+    tasks:[
+      {t:"Coordinate MEP sub sequence — plumbing, HVAC, and electrical share walls"},
+      {t:"Plumbing rough-in complete → schedule plumbing rough inspection",fl:"insp",b:"required"},
+      {t:"HVAC rough-in complete → schedule HVAC rough inspection",fl:"insp",b:"required"},
+      {t:"Electrical rough-in complete → schedule electrical rough inspection",fl:"insp",b:"required"},
+      {t:"ALL rough-in inspections passed → NOW schedule final framing inspection",fl:"insp",b:"gate inspection"},
+      {t:"Brick tie inspection if applicable",fl:"insp",b:"if brick veneer"},
+      {t:"Schedule pre-sheetrock walk with client — document before close-in"},
+      {t:"Pre-sheetrock inspection",fl:"insp",b:"required before insulation"},
+      {t:"Confirm insulation sub — batts or spray foam entire shell per energy code"},
+      {t:"Insulate walls — batts or spray foam entire shell"}
+    ],
+    costs:[
+      {item:"Plumbing (rough-in only)",amt:13700,note:"Ingram — rcvd 12.12.25 · Trim-out separate"},
+      {item:"Electrical (rough-in only)",amt:24750,note:"Rcvd 11.13.25 · Fixtures/trim separate"},
+      {item:"HVAC (rough-in only)",amt:14000,note:"Emailed 12.17.25 · Final trim-out separate"},
+      {item:"Fireplace",amt:4000,note:"Edwards ref — confirm if applicable"},
+      {item:"Insulation (walls)",amt:5500,note:"Edwards reference — batts or spray foam"}
+    ],
+    subs:["Plumber","Electrician","HVAC contractor","Insulation contractor"]
+  }
+},
+{
+  id:6, name:"Sheetrock & Exterior Shell", dur:"Weeks 14–18", flags:["trigger"],
+  cu:{
+    what:"Drywall transforms the framed shell into rooms. Simultaneously, exterior cladding — brick, siding, soffit, and fascia — goes on outside. Paint color decisions are needed now.",
+    decisions:[
+      "Paint colors for all interior rooms — needed before painter schedules",
+      "Ceiling texture preference: smooth, knockdown, or skip trowel",
+      "Exterior paint colors (if Hardie/vinyl) — confirm before exterior painting",
+      "Window and door glass cover specifications (fortification)"
+    ],
+    comms:[
+      {f:"Milestone",t:"Photo update when sheetrock is hung — rooms feel real for the first time"},
+      {f:"Weekly",   t:"Friday update"}
+    ],
+    pay:null,
+    mstn:"Sheetrock hung and finished. Exterior cladding complete. Ready for cabinets and trim."
+  },
+  pm:{
+    tasks:[
+      {t:"Sheetrock delivered — materials on site before crew mobilizes"},
+      {t:"Sheetrock hang and finish crew: hang → tape → finish → prime"},
+      {t:"Order window/door glass covers (fortification) — order early",fl:"trig",b:"lead time varies"},
+      {t:"Exterior brick, siding, soffit and fascia crew on site"},
+      {t:"Confirm paint colors from client before painter schedules",fl:"trig",b:"client decision"},
+      {t:"Interior paint — prime and finish coats"},
+      {t:"Exterior paint if Hardie/trim"},
+      {t:"Window and door glass covers installed per fortification spec"}
+    ],
+    costs:[
+      {item:"Sheetrock (materials)",amt:7500,note:"Edwards reference"},
+      {item:"Hang and finish sheetrock (labor)",amt:9000,note:"Edwards reference"},
+      {item:"Ext Vinyl & Hardie siding",amt:24000,note:"Emailed 12.11.25"},
+      {item:"Brick (materials)",amt:1000,note:"Edwards reference"},
+      {item:"Brick labor",amt:6500,note:"Edwards reference"},
+      {item:"Paint (int + ext)",amt:14850,note:"Edwards reference"},
+      {item:"Window/door glass covers & fortification",amt:6500,note:"Edwards reference"}
+    ],
+    subs:["Drywall crew","Brick mason","Siding/soffit/fascia crew","Painting crew"]
+  }
+},
+{
+  id:7, name:"Cabinets, Vanities & Tops", dur:"Weeks 17–21", flags:["trigger"],
+  cu:{
+    what:"Cabinets and vanities transform kitchens and bathrooms into functional spaces. Countertop templating happens immediately after cabinet install — selections and lead times matter.",
+    decisions:[
+      "Cabinet hardware — knobs and pulls — ordered separately from cabinet boxes",
+      "Countertop / granite material, color, and edge profile",
+      "Vanity selections confirmed — measuring happens this phase"
+    ],
+    comms:[
+      {f:"Milestone",t:"Photo when cabinets are installed — first look at kitchen and bathrooms"},
+      {f:"Weekly",   t:"Friday update"}
+    ],
+    pay:null,
+    mstn:"Cabinets and vanities installed. Countertops templated, fabricated, and installed."
+  },
+  pm:{
+    tasks:[
+      {t:"Measure and finalize cabinet/vanity order — measure after sheetrock is hung",fl:"trig",b:"measure before order"},
+      {t:"Confirm cabinet delivery date — coordinate with installer"},
+      {t:"Cabinet and vanity installer on site"},
+      {t:"Schedule countertop/granite template IMMEDIATELY after cabinet install",fl:"trig",b:"1–2 wk fabrication"},
+      {t:"Confirm countertop fabrication and delivery window"},
+      {t:"Shower and tub surrounds ordered and confirmed",fl:"trig",b:"verify lead time"},
+      {t:"Tops installed — granite/countertop crew on site"}
+    ],
+    costs:[
+      {item:"Cabinets",amt:30000,note:"Brian — $28K confirmed · $30K budget"},
+      {item:"Granite tops",amt:10000,note:"Edwards reference"},
+      {item:"Shower/tubs",amt:5500,note:"Edwards reference"},
+      {item:"Backsplash (materials)",amt:1500,note:"Edwards reference"},
+      {item:"Mirrors / shower doors",amt:4500,note:"Edwards reference"}
+    ],
+    subs:["Cabinet installer","Countertop fabricator"]
+  }
+},
+{
+  id:8, name:"Floors, Trim & Interior Finishes", dur:"Weeks 20–24", flags:["pay"],
+  cu:{
+    what:"Flooring goes in, trim carpenter completes interior doors and millwork, and the home comes together visually. Your second payment draw happens here.",
+    decisions:[
+      "Flooring: carpet in bedrooms, LVP in main areas — confirm species/color",
+      "Tile selections for any tiled areas",
+      "Lock and hardware selections — confirm finish and style"
+    ],
+    comms:[
+      {f:"Walk",     t:"Walk-through encouraged — first time the home looks truly finished"},
+      {f:"Milestone",t:"50% completion draw coordinated with lender bank inspection"},
+      {f:"Weekly",   t:"Friday update with photos"}
+    ],
+    pay:"Payment #2 at 50% completion per lender bank inspection. Invoice to client and lender.",
+    mstn:"Floors installed. Trim complete. Interior finishes done. Ready for MEP trim-out."
+  },
+  pm:{
+    tasks:[
+      {t:"Confirm flooring materials on site before installer schedules"},
+      {t:"Floor crew: carpet in bedrooms, LVP in remaining areas per Edwards spec"},
+      {t:"Trim carpenter: interior door installation, casing, base trim, shelving"},
+      {t:"Trim carpenter second pass after floors (base trim / shoe molding)"},
+      {t:"Lighting fixtures delivered — confirm all quantities and specs"},
+      {t:"Appliances ordered and confirmed for delivery",fl:"trig",b:"delivery window"},
+      {t:"Coordinate lender bank inspection for 50% draw — provide site access",fl:"trig",b:"payment gate"},
+      {t:"Send Payment #2 invoice to client AND lender simultaneously"},
+      {t:"Lock and hardware installed"}
+    ],
+    costs:[
+      {item:"Floors (carpet BRs + LVP main)",amt:12500,note:"Edwards ref"},
+      {item:"Int doors/trim labor & material",amt:17545,note:"Edwards reference"},
+      {item:"Lighting",amt:3500,note:"Edwards reference"},
+      {item:"Appliances",amt:4800,note:"Edwards reference"},
+      {item:"Lock/hardware",amt:1000,note:"Edwards reference"}
+    ],
+    subs:["Flooring crew","Trim carpenter"]
+  }
+},
+{
+  id:9, name:"MEP Trim-Out, Energy Tests & Final Inspections", dur:"Weeks 23–26", flags:["insp","trigger"],
+  cu:{
+    what:"Plumbing, electrical, and HVAC are trimmed out. Your home passes its energy efficiency test. We do a punch-list walk together — your list, your expectations. Nothing moves to final inspection until you're satisfied.",
+    decisions:[
+      "Confirm all plumbing and electrical fixture selections are on-site",
+      "Any last-minute items must be documented as change orders before work begins"
+    ],
+    comms:[
+      {f:"Walk",     t:"Punch-list walk — you flag everything, we document and complete before inspection"},
+      {f:"Milestone",t:"Final inspection date confirmed — you'll be notified in advance"}
+    ],
+    pay:null,
+    mstn:"All MEP trim-out complete. Blower door test passed. All final inspections passed. CO applied for."
+  },
+  pm:{
+    tasks:[
+      {t:"Plumber trim-out: faucets, toilets, shower valves, tub fixtures",fl:"insp",b:"plumbing final"},
+      {t:"Electrician trim-out: switches, outlets, panel schedule, all fixtures",fl:"insp",b:"electrical final"},
+      {t:"HVAC trim-out: registers, thermostat, equipment startup and balancing",fl:"insp",b:"HVAC final"},
+      {t:"Insulate attic with fiberglass batts — separate from wall insulation Phase 5"},
+      {t:"Blower door test (energy efficiency) — schedule with testing company",fl:"insp",b:"required by code"},
+      {t:"Final energy inspection — must pass before Certificate of Occupancy",fl:"insp",b:"energy code"},
+      {t:"Appliances installed"},
+      {t:"Punch-list walk with client — document all items, assign, track to completion"},
+      {t:"All punch-list items signed off by client before calling for final inspection"},
+      {t:"Schedule final building inspection",fl:"insp",b:"all trades must be done"},
+      {t:"Driveway poured — last or near-last to avoid heavy equipment damage",fl:"trig",b:"sequence carefully"},
+      {t:"Sod and landscaping — coordinate with driveway",fl:"trig",b:"near project end"}
+    ],
+    costs:[
+      {item:"Plumbing fixtures (trim-out)",amt:850,note:"Edwards ref"},
+      {item:"Driveway",amt:4000,note:"Edwards reference"},
+      {item:"Landscaping / sod",amt:5000,note:"Edwards reference"},
+      {item:"Home warranty",amt:2000,note:"Edwards reference"}
+    ],
+    subs:["Plumber (trim-out)","Electrician (trim-out)","HVAC (trim-out)","Energy testing","Concrete (driveway)","Landscape crew"]
+  }
+},
+{
+  id:10, name:"Handoff & Close-Out", dur:"Final week", flags:["pay"],
+  cu:{
+    what:"Certificate of Occupancy in hand. We walk every room together, review all systems, and hand over your documentation package. Interior deep clean is complete. You receive your keys when you're satisfied — not before.",
+    decisions:[],
+    comms:[
+      {f:"Final walk",t:"Homeowner orientation: every system, every warranty, year-one expectations"},
+      {f:"30-day",    t:"Follow-up call from your PM after move-in to answer any questions"}
+    ],
+    pay:"Final payment at Certificate of Occupancy. Invoice to client and lender.",
+    mstn:"Keys in hand. Clean home. Full documentation delivered. Project complete."
+  },
+  pm:{
+    tasks:[
+      {t:"Miscellaneous touch-ups from final inspection — complete before clean"},
+      {t:"Interior deep clean — professional crew"},
+      {t:"Exterior light wash if necessary"},
+      {t:"Receive Certificate of Occupancy — copy to client and lender immediately"},
+      {t:"Send final Payment #3 invoice to client AND lender simultaneously"},
+      {t:"Homeowner orientation walk — every system, all warranties, sub contacts"},
+      {t:"Deliver documentation package: CO, permits, warranties, sub contacts, fortification photos"},
+      {t:"Close project in Monday.com — archive with all docs and photos"},
+      {t:"Schedule 30-day follow-up call"},
+      {t:"Request client review and referral — ask at key handoff, timing matters"}
+    ],
+    costs:[
+      {item:"Subtotal (all line items)",amt:393295,note:"Edwards Home reference"},
+      {item:"Contractor fee (12%)",amt:47195,note:"Applied to subtotal"},
+      {item:"Total contract",amt:440490,note:"Edwards ref → target $450,000"}
+    ],
+    subs:["Cleaning crew"]
+  }
+}
+];
 
-  // stats
-  const active = projects.filter(p => p.status === 'active').length;
-  const pct = p => p.tasks_total > 0 ? Math.round((p.tasks_done / p.tasks_total) * 100) : 0;
-  const avgProg = projects.length
-    ? Math.round(projects.reduce((a, p) => a + pct(p), 0) / projects.length)
-    : 0;
+// ════════════════════════════════════════════════════════════
+//  DATA LAYER  (localStorage)
+// ════════════════════════════════════════════════════════════
+const DB = {
+  // ── Projects ──
+  getProjects(){ return JSON.parse(localStorage.getItem('sbc_projects')||'{}') },
+  saveProjects(d){ localStorage.setItem('sbc_projects',JSON.stringify(d)) },
+  getProject(id){ return this.getProjects()[id]||null },
+  createProject(data){
+    const projects = this.getProjects()
+    const id = 'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)
+    projects[id] = {...data, id, createdAt:Date.now(), tasks:{}, decisions:{}}
+    this.saveProjects(projects)
+    return id
+  },
+  updateProject(id,data){
+    const projects = this.getProjects()
+    if(projects[id]) projects[id] = {...projects[id],...data}
+    this.saveProjects(projects)
+  },
+  deleteProject(id){
+    const projects = this.getProjects()
+    delete projects[id]
+    this.saveProjects(projects)
+    localStorage.removeItem('sbc_co_'+id)
+    localStorage.removeItem('sbc_ph_'+id)
+  },
+  toggleTask(projectId,phaseId,taskIdx){
+    const projects = this.getProjects()
+    const p = projects[projectId]; if(!p) return
+    if(!p.tasks) p.tasks={}
+    const k=`${phaseId}_${taskIdx}`
+    p.tasks[k]=!p.tasks[k]
+    this.saveProjects(projects)
+  },
+  toggleDecision(projectId,phaseId,decIdx){
+    const projects = this.getProjects()
+    const p = projects[projectId]; if(!p) return
+    if(!p.decisions) p.decisions={}
+    const k=`${phaseId}_${decIdx}`
+    p.decisions[k]=!p.decisions[k]
+    this.saveProjects(projects)
+  },
+  // ── Change Orders ──
+  getCOs(pid){ return JSON.parse(localStorage.getItem('sbc_co_'+pid)||'[]') },
+  saveCOs(pid,d){ localStorage.setItem('sbc_co_'+pid,JSON.stringify(d)) },
+  addCO(pid,data){
+    const cos=this.getCOs(pid)
+    const co={...data,id:'co_'+Date.now(),projectId:pid,requestedAt:Date.now(),status:'pending'}
+    cos.push(co); this.saveCOs(pid,cos); return co
+  },
+  signCO(pid,coId,name){
+    const cos=this.getCOs(pid)
+    const co=cos.find(c=>c.id===coId)
+    if(co){co.status='signed';co.signedAt=Date.now();co.signedBy=name}
+    this.saveCOs(pid,cos)
+  },
+  rejectCO(pid,coId,reason){
+    const cos=this.getCOs(pid)
+    const co=cos.find(c=>c.id===coId)
+    if(co){co.status='rejected';co.rejectedAt=Date.now();co.rejectionReason=reason||''}
+    this.saveCOs(pid,cos)
+  },
+  // ── Photos ──
+  getPhotos(pid){ return JSON.parse(localStorage.getItem('sbc_ph_'+pid)||'{}') },
+  savePhotos(pid,d){ localStorage.setItem('sbc_ph_'+pid,JSON.stringify(d)) },
+  addPhoto(pid,phaseId,dataUrl,caption){
+    const photos=this.getPhotos(pid)
+    if(!photos[phaseId]) photos[phaseId]=[]
+    photos[phaseId].push({id:'ph_'+Date.now(),dataUrl,caption,uploadedAt:Date.now()})
+    this.savePhotos(pid,photos)
+  },
+  deletePhoto(pid,phaseId,photoId){
+    const photos=this.getPhotos(pid)
+    if(photos[phaseId]) photos[phaseId]=photos[phaseId].filter(p=>p.id!==photoId)
+    this.savePhotos(pid,photos)
+  }
+}
 
-  document.getElementById('pg-sub').textContent =
-    projects.length === 0 ? 'No projects yet — create one to get started'
-    : `${projects.length} project${projects.length !== 1 ? 's' : ''} · ${active} active`;
+// ════════════════════════════════════════════════════════════
+//  ROUTER  (URL hash navigation)
+// ════════════════════════════════════════════════════════════
+let STATE = {view:'dashboard', projectId:null, role:'pm', openPhases:new Set([1])}
+let _pendingCOProjectId=null, _pendingCOId=null, _pendingPhotoPhaseId=null, _pendingPhotoProjectId=null
 
-  document.getElementById('stats-row').innerHTML = projects.length ? `
-    <div class="stat"><div class="stat-n">${projects.length}</div><div class="stat-l">Total Projects</div></div>
-    <div class="stat"><div class="stat-n">${active}</div><div class="stat-l">Active</div></div>
-    <div class="stat"><div class="stat-n">${avgProg}%</div><div class="stat-l">Avg. Progress</div></div>
-  ` : '';
+function navigate(hash){
+  window.location.hash = hash
+}
 
-  const grid = document.getElementById('grid');
-  if (!projects.length) {
-    grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
-      <div class="empty-icon">🏗</div>
-      <div class="empty-title">No projects yet</div>
-      <div class="empty-sub">Create your first project to start tracking the build timeline, tasks, and client communications.</div>
-      <button class="btn-new" onclick="openModal()">+ Create First Project</button>
-    </div>`;
-    return;
+function parseHash(){
+  const h = (window.location.hash||'').replace(/^#/,'').trim()
+  if(!h || h==='dashboard'){
+    STATE.view='dashboard'; STATE.projectId=null; STATE.role='pm'
+  } else if(h==='new'){
+    STATE.view='new-project'
+  } else if(h.startsWith('p/')){
+    const parts = h.split('/')
+    const prevId = STATE.projectId
+    STATE.projectId = parts[1]
+    STATE.role = parts[2]==='c' ? 'customer' : 'pm'
+    STATE.view = 'project'
+    if(STATE.projectId !== prevId) STATE.openPhases = new Set([1])
+  }
+  renderApp()
+}
+
+window.addEventListener('hashchange', parseHash)
+
+// ════════════════════════════════════════════════════════════
+//  RENDER ENGINE
+// ════════════════════════════════════════════════════════════
+function renderApp(){
+  const app = document.getElementById('app')
+  if(STATE.view==='dashboard'){
+    app.innerHTML = renderDashboard()
+  } else if(STATE.view==='new-project'){
+    app.innerHTML = renderProjectForm()
+    // Set default dates
+    const today = new Date()
+    const el = document.getElementById('f-start')
+    if(el && !el.value) el.value = today.toISOString().split('T')[0]
+    const endEl = document.getElementById('f-end')
+    if(endEl && !endEl.value){
+      const end = new Date(today); end.setMonth(end.getMonth()+6)
+      endEl.value = end.toISOString().split('T')[0]
+    }
+  } else if(STATE.view==='project'){
+    const proj = DB.getProject(STATE.projectId)
+    if(!proj){ navigate(''); return }
+    app.innerHTML = renderProject(proj, STATE.role)
+  }
+}
+
+// ── Dashboard ──
+function renderDashboard(){
+  const projects = DB.getProjects()
+  const list = Object.values(projects).sort((a,b)=>b.createdAt-a.createdAt)
+  const topbar = `<div class="topbar">
+    <div class="tb-brand" onclick="navigate('')">
+      <span class="tb-logo">Southern Bay Construction</span>
+      <div class="tb-sep"></div>
+      <span class="tb-title">Project Manager</span>
+    </div>
+    <div class="tb-right">
+      <button class="btn btn-primary" onclick="navigate('new')">+ New Project</button>
+    </div>
+  </div>`
+
+  if(!list.length){
+    return topbar+`<div class="dashboard"><div class="empty-state">
+      <div class="empty-icon">🏗️</div>
+      <div class="empty-h">No projects yet</div>
+      <p class="empty-p">Create your first project to get started. All 10 phases and task checklists will be generated automatically.</p>
+      <button class="btn btn-primary" onclick="navigate('new')">+ Create First Project</button>
+    </div></div>`
   }
 
-  grid.innerHTML = projects.map(p => {
-    const progress = pct(p);
-    const hasDate = d => d && d.trim();
-    const fmt = d => {
-      if (!hasDate(d)) return null;
-      const parts = d.split('-');
-      if (parts.length < 3) return d;
-      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      return `${months[parseInt(parts[1]) - 1]} ${parseInt(parts[2])}, ${parts[0]}`;
-    };
-
-    return `
-    <a class="card" href="/project.html?id=${p.id}">
-      <div class="card-head">
-        <div>
-          <div class="card-name">${p.name}</div>
-          <div class="card-client">${p.client_name || 'No client name'}</div>
-        </div>
-        <span class="card-status ${p.status === 'active' ? 's-active' : 's-complete'}">
-          ${p.status === 'active' ? '● ACTIVE' : '✓ COMPLETE'}
-        </span>
+  const totalTasks = PHASES.reduce((s,ph)=>s+ph.pm.tasks.length,0)
+  const cards = list.map(proj=>{
+    const cos=DB.getCOs(proj.id)
+    const pending=cos.filter(c=>c.status==='pending').length
+    const signed=cos.filter(c=>c.status==='signed').length
+    const doneTasks=proj.tasks?Object.values(proj.tasks).filter(Boolean).length:0
+    const pct=Math.round(doneTasks/totalTasks*100)
+    const badges=[
+      pending?`<span class="badge badge-pending">⚠ ${pending} pending CO${pending>1?'s':''}</span>`:'',
+      signed?`<span class="badge badge-signed">✓ ${signed} approved</span>`:''
+    ].filter(Boolean).join('')
+    return `<div class="proj-card" onclick="navigate('p/${proj.id}')">
+      <div class="pc-name">${esc(proj.name)}</div>
+      <div class="pc-meta">
+        <div class="pc-row"><span class="pc-icon">👤</span>${esc(proj.clientName)||'—'}</div>
+        <div class="pc-row"><span class="pc-icon">📍</span>${esc(proj.address)||'—'}</div>
+        <div class="pc-row"><span class="pc-icon">🗓</span>${proj.contractDate||'—'} → ${proj.estCompletion||'—'}</div>
+        <div class="pc-row"><span class="pc-icon">👷</span>${esc(proj.pm)||'—'}</div>
       </div>
-      <div class="card-body">
-        <div class="card-row">
-          <div class="card-field">
-            <div class="cf-label">Address</div>
-            <div class="cf-val ${!hasDate(p.address) ? 'empty' : ''}">${p.address || 'Not set'}</div>
-          </div>
-          <div class="card-field">
-            <div class="cf-label">PM</div>
-            <div class="cf-val ${!p.pm ? 'empty' : ''}">${p.pm || 'Not assigned'}</div>
-          </div>
-        </div>
-        <div class="card-row">
-          <div class="card-field">
-            <div class="cf-label">Contract Date</div>
-            <div class="cf-val ${!hasDate(p.contract_date) ? 'empty' : ''}">${fmt(p.contract_date) || 'Not set'}</div>
-          </div>
-          <div class="card-field">
-            <div class="cf-label">Est. Completion</div>
-            <div class="cf-val ${!hasDate(p.est_completion) ? 'empty' : ''}">${fmt(p.est_completion) || 'Not set'}</div>
-          </div>
-        </div>
-        <div class="prog-wrap">
-          <div class="prog-top">
-            <span class="prog-label">Tasks completed</span>
-            <span class="prog-pct">${p.tasks_done} / ${p.tasks_total} · ${progress}%</span>
-          </div>
-          <div class="prog-bar"><div class="prog-fill" style="width:${progress}%"></div></div>
-        </div>
+      <div class="pc-progress">
+        <div class="pc-prog-label"><span>Task Progress</span><span>${doneTasks}/${totalTasks} (${pct}%)</span></div>
+        <div class="pc-prog-bar"><div class="pc-prog-fill" style="width:${pct}%"></div></div>
       </div>
-      <div class="card-foot">
-        <span class="card-date">Updated ${timeAgo(p.updated_at)}</span>
-        <button class="card-del" onclick="del(event, ${p.id})">Archive</button>
+      ${badges?`<div class="pc-badges">${badges}</div>`:''}
+    </div>`
+  }).join('')
+
+  return topbar+`<div class="dashboard">
+    <div class="dash-header">
+      <div class="dash-h1">Active Projects</div>
+      <span style="font-size:12px;color:var(--txt-l)">${list.length} project${list.length!==1?'s':''}</span>
+    </div>
+    <div class="project-grid">${cards}</div>
+  </div>`
+}
+
+// ── New Project Form ──
+function renderProjectForm(){
+  return `<div class="topbar">
+    <div class="tb-brand" onclick="navigate('')">
+      <span class="tb-logo">Southern Bay Construction</span>
+      <div class="tb-sep"></div>
+      <span class="tb-title">New Project</span>
+    </div>
+  </div>
+  <div class="dashboard"><div class="form-wrap">
+    <div class="form-h">New Construction Project</div>
+    <p class="form-sub">Enter the project details below. All 10 phases, task checklists, and cost references will be created automatically.</p>
+    <div class="form-grid">
+      <div class="form-field form-full">
+        <label class="form-label">Project Name *</label>
+        <input class="form-input" id="f-name" placeholder="e.g. Smith Residence — Custom Home Build">
       </div>
-    </a>`;
-  }).join('');
+      <div class="form-field">
+        <label class="form-label">Client Name</label>
+        <input class="form-input" id="f-client" placeholder="John & Jane Smith">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Property Address</label>
+        <input class="form-input" id="f-address" placeholder="123 Main St, Pensacola FL">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Contract Date</label>
+        <input class="form-input" id="f-start" type="date">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Est. Completion</label>
+        <input class="form-input" id="f-end" type="date">
+      </div>
+      <div class="form-field form-full">
+        <label class="form-label">Project Manager</label>
+        <input class="form-input" id="f-pm" value="David / Jacob">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="navigate('')">Cancel</button>
+      <button class="btn btn-primary" onclick="createProject()">Create Project →</button>
+    </div>
+  </div></div>`
 }
 
-function timeAgo(dt) {
-  if (!dt) return 'recently';
-  const diff = (Date.now() - new Date(dt + 'Z').getTime()) / 1000;
-  if (diff < 60) return 'just now';
-  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
-  return `${Math.floor(diff/86400)}d ago`;
+// ── Project View ──
+function renderProject(proj, role){
+  const isPM = role==='pm'
+  const cos = DB.getCOs(proj.id)
+  const signedCOs = cos.filter(c=>c.status==='signed')
+  const pendingCOs = cos.filter(c=>c.status==='pending')
+
+  const baseTotal = PHASES.reduce((sum,ph)=>{
+    return sum+(ph.pm.costs||[]).reduce((s,c)=>s+(c.amt||0),0)
+  },0)
+  const signedTotal = signedCOs.reduce((s,co)=>s+(parseFloat(co.amount)||0),0)
+  const pendingTotal = pendingCOs.reduce((s,co)=>s+(parseFloat(co.amount)||0),0)
+  const approvedTotal = baseTotal+signedTotal
+
+  const totalTasks = PHASES.reduce((s,ph)=>s+ph.pm.tasks.length,0)
+  const doneTasks = proj.tasks?Object.values(proj.tasks).filter(Boolean).length:0
+  const pct = Math.round(doneTasks/totalTasks*100)
+
+  // Topbar
+  const topbar = isPM
+    ? `<div class="topbar">
+        <div class="tb-brand" onclick="navigate('')">
+          <span class="tb-logo">SBC</span>
+          <div class="tb-sep"></div>
+          <span class="tb-title">${esc(proj.name)}</span>
+        </div>
+        <div class="tb-right">
+          <div class="vtabs">
+            <button class="vtab" onclick="navigate('p/${proj.id}/c')">Customer View</button>
+            <button class="vtab on">PM View</button>
+          </div>
+          <button class="btn btn-green btn-sm" onclick="copyCustomerLink('${proj.id}')">🔗 Share Link</button>
+          <button class="btn btn-primary btn-sm" onclick="openCOModal('${proj.id}')">+ Change Order</button>
+        </div>
+      </div>`
+    : `<div class="topbar">
+        <div class="tb-brand" onclick="navigate('p/${proj.id}')">
+          <span class="tb-logo">SBC</span>
+          <div class="tb-sep"></div>
+          <span class="tb-title">${esc(proj.name)}</span>
+        </div>
+        <div class="tb-right">
+          <span class="role-badge role-cu">📋 Customer Portal</span>
+        </div>
+      </div>`
+
+  const breadcrumb = `<div class="breadcrumb">
+    ${isPM?`<span class="bc-link" onclick="navigate('')">Projects</span><span class="bc-sep">›</span>`:''}
+    <span>${esc(proj.name)}</span>
+    ${!isPM?`<span class="bc-sep">›</span><span>Customer Portal</span>`:''}
+  </div>`
+
+  const meta = `<div class="proj-meta">
+    <div class="pm-field"><span class="pm-label">Client</span><span class="pm-val">${esc(proj.clientName)||'—'}</span></div>
+    <div class="pm-field"><span class="pm-label">Address</span><span class="pm-val">${esc(proj.address)||'—'}</span></div>
+    <div class="pm-field"><span class="pm-label">Contract</span><span class="pm-val">${proj.contractDate||'—'}</span></div>
+    <div class="pm-field"><span class="pm-label">Est. Complete</span><span class="pm-val">${proj.estCompletion||'—'}</span></div>
+    <div class="pm-field"><span class="pm-label">PM</span><span class="pm-val">${esc(proj.pm)||'—'}</span></div>
+    <span class="role-badge ${isPM?'role-pm':'role-cu'}">${isPM?'⚙ PM View':'👤 Customer View'}</span>
+  </div>`
+
+  // Progress bar
+  const progressBar = `<div class="overall-progress">
+    <span class="op-label">Task Progress</span>
+    <div class="op-bar-wrap"><div class="op-bar-fill" style="width:${pct}%"></div></div>
+    <span class="op-count">${doneTasks} / ${totalTasks} tasks · ${pct}%</span>
+  </div>`
+
+  // Budget panel
+  const budget = `<div class="budget-panel">
+    <div class="bp-header">
+      <span class="bp-title">Budget Overview</span>
+    </div>
+    <div class="bp-grid">
+      <div class="bp-stat">
+        <div class="bp-num">${fmt(baseTotal)}</div>
+        <div class="bp-lbl">base estimate</div>
+      </div>
+      <div class="bp-stat">
+        <div class="bp-num ${signedTotal>0?'green':''}">${signedTotal>0?'+'+fmt(signedTotal):'$0'}</div>
+        <div class="bp-lbl">approved change orders</div>
+      </div>
+      <div class="bp-stat">
+        <div class="bp-num ${pendingTotal>0?'amber':''}">${pendingTotal>0?'+'+fmt(pendingTotal):'$0'}</div>
+        <div class="bp-lbl">pending approval</div>
+      </div>
+      <div class="bp-stat">
+        <div class="bp-num ${signedTotal>0?'green':''}">${fmt(approvedTotal)}</div>
+        <div class="bp-lbl">approved total</div>
+      </div>
+    </div>
+  </div>`
+
+  // Change orders panel
+  const coPanel = renderCOPanel(proj.id, cos, role)
+
+  // Customer welcome block
+  const cuWelcome = !isPM ? `<div class="cu-welcome">
+    <div class="cu-welcome-inner">
+      <div class="cu-welcome-label">Your Project Portal</div>
+      <div class="cu-welcome-title">${esc(proj.name)}</div>
+      <div class="cu-welcome-sub">
+        Your PM is <strong>${esc(proj.pm)||'your project manager'}</strong>.
+        Below you'll find each phase of your build, what's happening, decisions we need from you,
+        and any change orders requiring your approval. Check off decisions as you confirm them.
+      </div>
+    </div>
+  </div>` : ''
+
+  const legend = isPM ? `<div class="legend">
+    <div class="li"><div class="ld ld-t"></div>Lead-time trigger</div>
+    <div class="li"><div class="ld ld-i"></div>Inspection required</div>
+    <div class="li"><div class="ld ld-g"></div>Client communication</div>
+  </div>` : ''
+
+  const phasesHtml = `<div class="phases">
+    ${PHASES.map(ph=>renderPhase(ph,proj,role)).join('')}
+  </div>`
+
+  const summary = isPM ? `<div class="summary">
+    <div class="ss"><div class="sn">10</div><div class="sl">phases</div></div>
+    <div class="ss"><div class="sn">20–26</div><div class="sl">est. weeks</div></div>
+    <div class="ss"><div class="sn">3</div><div class="sl">payment milestones</div></div>
+    <div class="ss"><div class="sn">${fmt(approvedTotal)}</div><div class="sl">approved total</div></div>
+    <div class="sf2">Edwards Home reference: $393,295 base · 12% contractor fee ($47,195) · Adjust line items per project</div>
+  </div>` : ''
+
+  return topbar+breadcrumb+meta+progressBar+cuWelcome+budget+coPanel+legend+phasesHtml+summary
 }
 
-async function del(e, id) {
-  e.preventDefault();
-  if (!confirm('Archive this project? You can restore it later.')) return;
-  await fetch(`/api/projects/${id}`, { method: 'DELETE' });
-  load();
+// ── Change Orders Panel ──
+function renderCOPanel(pid, cos, role){
+  const isPM = role==='pm'
+  if(!cos.length && !isPM) return ''
+
+  const items = !cos.length
+    ? `<div class="co-empty">${isPM?'No change orders yet. Use "+ Change Order" to document scope changes for customer approval.':'No change orders at this time.'}</div>`
+    : cos.map(co=>{
+        const ph = PHASES.find(p=>p.id===parseInt(co.phase))
+        const phName = ph?ph.name:`Phase ${co.phase}`
+        const pill = {
+          pending:`<span class="co-status-pill csp-pending">Pending Approval</span>`,
+          signed: `<span class="co-status-pill csp-signed">Approved</span>`,
+          rejected:`<span class="co-status-pill csp-rejected">Declined</span>`
+        }[co.status]
+        const signBtn = (co.status==='pending'&&!isPM)
+          ? `<button class="btn btn-primary btn-sm" onclick="openSignModal('${pid}','${co.id}')">Review &amp; Sign</button>` : ''
+        const footer = co.status==='signed'
+          ? `<div class="co-sig-line">✓ Signed by ${esc(co.signedBy)} · ${fmtDate(co.signedAt)}</div>`
+          : co.status==='rejected'
+          ? `<div class="co-rej-line">✕ Declined ${fmtDate(co.rejectedAt)}${co.rejectionReason?' — "'+esc(co.rejectionReason)+'"':''}</div>`
+          : ''
+        return `<div class="co-item ${co.status}">
+          <div>${pill}</div>
+          <div class="co-body">
+            <div class="co-name">${esc(co.title)}</div>
+            ${co.description?`<div class="co-desc">${esc(co.description)}</div>`:''}
+            <div class="co-meta-row">
+              <span class="co-amount">${co.amount&&parseFloat(co.amount)>0?'+'+fmt(parseFloat(co.amount)):'No cost change'}</span>
+              <span class="co-meta-txt">Phase ${co.phase}: ${phName}</span>
+              <span class="co-meta-txt">Requested ${fmtDate(co.requestedAt)}</span>
+              ${signBtn}
+            </div>
+            ${footer}
+          </div>
+        </div>`
+      }).join('')
+
+  const pendingCount = cos.filter(c=>c.status==='pending').length
+  const signedCount  = cos.filter(c=>c.status==='signed').length
+
+  return `<div class="co-panel">
+    <div class="co-panel-header">
+      <span class="co-panel-title">Change Orders</span>
+      ${cos.length?`<span style="font-size:11px;color:#5A8AA0">${pendingCount} pending · ${signedCount} approved</span>`:''}
+    </div>
+    <div class="co-list">${items}</div>
+  </div>`
 }
 
-function openModal() {
-  const today = new Date().toISOString().split('T')[0];
-  const end = new Date(); end.setMonth(end.getMonth() + 6);
-  document.getElementById('f-start').value = today;
-  document.getElementById('f-end').value = end.toISOString().split('T')[0];
-  document.getElementById('overlay').classList.add('show');
-  setTimeout(() => document.getElementById('f-name').focus(), 100);
+// ── Phase Card ──
+function renderPhase(ph, proj, role){
+  const isPM = role==='pm'
+  const isOpen = STATE.openPhases && STATE.openPhases.has(ph.id)
+  const cos = DB.getCOs(proj.id).filter(co=>parseInt(co.phase)===ph.id)
+  const phasePhotos = (DB.getPhotos(proj.id)[ph.id]||[])
+  const pendingCOs = cos.filter(c=>c.status==='pending').length
+
+  const flags = ph.flags.map(f=>({
+    trigger:`<span class="sf sf-t">⚡ LEAD-TIME</span>`,
+    insp:   `<span class="sf sf-i">⬡ INSPECTION</span>`,
+    pay:    `<span class="sf sf-p">$ PAYMENT</span>`
+  }[f]||'')).join('')
+  const coBadge = pendingCOs ? `<span class="sf sf-co">⚠ ${pendingCOs} CO</span>` : ''
+  const phBadge = phasePhotos.length ? `<span class="sf sf-ph">📷 ${phasePhotos.length}</span>` : ''
+
+  const strip = `<div class="strip" onclick="togglePhase(${ph.id})">
+    <span class="pnum">PHASE ${String(ph.id).padStart(2,'0')}</span>
+    <span class="ptitle">${ph.name}</span>
+    <span class="pdur">${ph.dur}</span>
+    <div class="strip-flags">${flags}${coBadge}${phBadge}</div>
+    <span class="chev">${isOpen?'▲':'▼'}</span>
+  </div>`
+
+  if(!isOpen) return `<div class="phase" id="ph-${ph.id}">${strip}</div>`
+
+  // Photos section (visible in both views)
+  const photosHtml = `<div class="blk">
+    <div class="blab cu">Phase Photos${phasePhotos.length?` (${phasePhotos.length})`:''}</div>
+    <div class="photo-grid">
+      ${phasePhotos.map(photo=>`<div>
+        <div class="photo-thumb" onclick="viewPhoto('${photo.dataUrl}')">
+          <img src="${photo.dataUrl}" alt="${esc(photo.caption||'')}">
+          ${isPM?`<button class="photo-del" onclick="deletePhotoEvt(event,'${proj.id}',${ph.id},'${photo.id}')">✕</button>`:''}
+        </div>
+        ${photo.caption?`<div class="photo-caption">${esc(photo.caption)}</div>`:''}
+      </div>`).join('')}
+      ${isPM?`<button class="photo-add" onclick="openPhotoModal('${proj.id}',${ph.id})">
+        <span style="font-size:20px">📷</span>
+        <span>Add Photo</span>
+      </button>`:''}
+    </div>
+  </div>`
+
+  // Decisions: PM sees plain list, customer gets interactive checkboxes
+  const decHtml = ph.cu.decisions.length ? `<div class="blk">
+    <div class="blab cu">${isPM?'Decisions needed from client':'Decisions needed from you'}</div>
+    <div class="decs">
+      ${ph.cu.decisions.map((d,i)=>{
+        if(isPM) return `<div class="dec"><span class="da">›</span><span>${esc(d)}</span></div>`
+        const k=`${ph.id}_${i}`
+        const done = proj.decisions&&proj.decisions[k]
+        return `<div class="dec-item${done?' confirmed':''}" onclick="toggleDecision('${proj.id}',${ph.id},${i})">
+          <div class="dec-cb">${done?'✓':''}</div>
+          <span class="dec-text">${esc(d)}</span>
+        </div>`
+      }).join('')}
+    </div>
+  </div>` : ''
+
+  const commHtml = `<div class="blk">
+    <div class="blab cu">Communication checkpoints</div>
+    ${ph.cu.comms.map(c=>`<div class="comm"><span class="cf">${c.f}</span><span>${esc(c.t)}</span></div>`).join('')}
+  </div>`
+
+  const payHtml = ph.cu.pay
+    ? `<div class="blk"><div class="pay">💰 ${esc(ph.cu.pay)}</div></div>`
+    : ''
+
+  // Phase-level COs (summary, customer view)
+  const phaseCOHtml = (cos.length && !isPM) ? `<div class="blk">
+    <div class="blab cu">Change Orders — This Phase</div>
+    ${cos.map(co=>{
+      const pill = {
+        pending:`<span class="co-status-pill csp-pending">Pending Your Approval</span>`,
+        signed: `<span class="co-status-pill csp-signed">Approved by You</span>`,
+        rejected:`<span class="co-status-pill csp-rejected">Declined</span>`
+      }[co.status]
+      const signBtn = co.status==='pending'
+        ? `<button class="btn btn-primary btn-sm" style="margin-top:6px" onclick="openSignModal('${proj.id}','${co.id}')">Review &amp; Sign</button>` : ''
+      return `<div class="co-item ${co.status}" style="border-radius:6px;margin-bottom:6px">
+        <div>${pill}</div>
+        <div class="co-body">
+          <div class="co-name">${esc(co.title)}</div>
+          ${co.description?`<div class="co-desc">${esc(co.description)}</div>`:''}
+          <div class="co-amount" style="margin-top:4px">${co.amount&&parseFloat(co.amount)>0?'+'+fmt(parseFloat(co.amount)):'No cost change'}</div>
+          ${signBtn}
+        </div>
+      </div>`
+    }).join('')}
+  </div>` : ''
+
+  const cuCol = `
+    <div class="ch cu"><div class="cdot cu"></div>${isPM?'Customer-facing':'What You Need to Know'}</div>
+    <div class="cb cu">
+      <div class="blk"><div class="blab cu">What's happening</div><div class="btxt">${esc(ph.cu.what)}</div></div>
+      ${decHtml}${commHtml}${payHtml}${phaseCOHtml}${photosHtml}
+      <div class="mstn">✓ ${esc(ph.cu.mstn)}</div>
+    </div>`
+
+  if(!isPM){
+    return `<div class="phase open" id="ph-${ph.id}">${strip}
+      <div class="pcols" data-v="customer">${cuCol}</div>
+    </div>`
+  }
+
+  // PM column
+  const tasksHtml = ph.pm.tasks.map((t,i)=>{
+    const k=`${ph.id}_${i}`
+    const done = proj.tasks&&proj.tasks[k]
+    const cls=['task',t.fl==='trig'?'trig':t.fl==='insp'?'insp':'',done?'done':''].filter(Boolean).join(' ')
+    const badge = t.b?`<span class="tbadge ${t.fl==='trig'?'tb-t':t.fl==='insp'?'tb-i':''}">${t.b}</span>`:''
+    return `<div class="${cls}" onclick="toggleTask('${proj.id}',${ph.id},${i})">
+      <div class="tcb">${done?'✓':''}</div>
+      <span class="tt">${esc(t.t)}</span>${badge}
+    </div>`
+  }).join('')
+
+  const costsHtml = ph.pm.costs&&ph.pm.costs.length?`<div class="blk">
+    <div class="blab pm">Cost reference (Edwards Home)</div>
+    <table class="ctable">
+      <tr><th>Line Item</th><th>Amount</th></tr>
+      ${ph.pm.costs.map(c=>`<tr>
+        <td>${esc(c.item)}${c.note?`<br><span class="cref">${esc(c.note)}</span>`:''}</td>
+        <td>${c.amt?fmt(c.amt):'<span style="color:#B88">— quote</span>'}</td>
+      </tr>`).join('')}
+    </table>
+  </div>`:''
+
+  const subsHtml = ph.pm.subs&&ph.pm.subs.length?`<div class="blk">
+    <div class="blab pm">Subcontractors</div>
+    <div class="stags">${ph.pm.subs.map(s=>`<span class="stag">${esc(s)}</span>`).join('')}</div>
+  </div>`:''
+
+  const pmCol = `
+    <div class="ch pm"><div class="cdot pm"></div>PM / Internal</div>
+    <div class="cb pm">
+      <div class="blk"><div class="blab pm">Task sequence</div><div class="tlist">${tasksHtml}</div></div>
+      ${costsHtml}${subsHtml}
+    </div>`
+
+  return `<div class="phase open" id="ph-${ph.id}">${strip}
+    <div class="pcols" data-v="both">${cuCol}${pmCol}</div>
+  </div>`
 }
 
-function closeModal(e) {
-  if (e && e.target !== document.getElementById('overlay')) return;
-  document.getElementById('overlay').classList.remove('show');
-  ['f-name','f-client','f-addr','f-pm'].forEach(id => document.getElementById(id).value = '');
-}
+// ════════════════════════════════════════════════════════════
+//  ACTIONS
+// ════════════════════════════════════════════════════════════
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.getElementById('overlay').classList.remove('show');
-  if (e.key === 'Enter' && document.getElementById('overlay').classList.contains('show')) createProject();
-});
-
-async function createProject() {
-  const name = document.getElementById('f-name').value.trim();
-  if (!name) { document.getElementById('f-name').focus(); return; }
-  const body = {
+function createProject(){
+  const name = document.getElementById('f-name').value.trim()
+  if(!name){ showToast('⚠ Project name is required'); return }
+  const id = DB.createProject({
     name,
-    client_name: document.getElementById('f-client').value.trim(),
-    address: document.getElementById('f-addr').value.trim(),
-    contract_date: document.getElementById('f-start').value,
-    est_completion: document.getElementById('f-end').value,
-    pm: document.getElementById('f-pm').value.trim(),
-  };
-  const { id } = await fetch('/api/projects', {
-    method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body)
-  }).then(r => r.json());
-  window.location.href = `/project.html?id=${id}`;
+    clientName: document.getElementById('f-client').value.trim(),
+    address:    document.getElementById('f-address').value.trim(),
+    contractDate: document.getElementById('f-start').value,
+    estCompletion: document.getElementById('f-end').value,
+    pm: document.getElementById('f-pm').value.trim()
+  })
+  navigate('p/'+id)
 }
 
-load();
+function togglePhase(id){
+  if(!STATE.openPhases) STATE.openPhases = new Set()
+  STATE.openPhases.has(id) ? STATE.openPhases.delete(id) : STATE.openPhases.add(id)
+  renderApp()
+}
+
+function toggleTask(pid, phaseId, taskIdx){
+  DB.toggleTask(pid, phaseId, taskIdx)
+  renderApp()
+}
+
+function toggleDecision(pid, phaseId, decIdx){
+  DB.toggleDecision(pid, phaseId, decIdx)
+  renderApp()
+}
+
+// ── Change Orders ──
+function openCOModal(pid){
+  _pendingCOProjectId = pid
+  const sel = document.getElementById('co-phase')
+  sel.innerHTML = PHASES.map(p=>`<option value="${p.id}">Phase ${String(p.id).padStart(2,'0')}: ${p.name}</option>`).join('')
+  document.getElementById('co-title').value = ''
+  document.getElementById('co-desc').value  = ''
+  document.getElementById('co-amount').value = ''
+  openModal('co-modal')
+}
+
+function submitCO(){
+  const title = document.getElementById('co-title').value.trim()
+  if(!title){ showToast('⚠ Change order title is required'); return }
+  DB.addCO(_pendingCOProjectId,{
+    phase:  document.getElementById('co-phase').value,
+    title,
+    description: document.getElementById('co-desc').value.trim(),
+    amount: document.getElementById('co-amount').value
+  })
+  closeModal('co-modal')
+  showToast('Change order added — customer will see it in their portal')
+  renderApp()
+}
+
+function openSignModal(pid, coId){
+  _pendingCOProjectId = pid
+  _pendingCOId = coId
+  const cos = DB.getCOs(pid)
+  const co = cos.find(c=>c.id===coId); if(!co) return
+  const ph = PHASES.find(p=>p.id===parseInt(co.phase))
+  document.getElementById('sign-modal-title').textContent = co.title
+  document.getElementById('sign-modal-detail').innerHTML = `
+    <div class="co-review-box">
+      <div class="co-review-title">${esc(co.title)}</div>
+      ${co.description?`<div class="co-review-row"><span>Description</span><span class="co-review-val">${esc(co.description)}</span></div>`:''}
+      <div class="co-review-row"><span>Phase</span><span class="co-review-val">${ph?ph.name:'Phase '+co.phase}</span></div>
+      <div class="co-review-row"><span>Requested</span><span class="co-review-val">${fmtDate(co.requestedAt)}</span></div>
+      <div class="co-amount-display">${co.amount&&parseFloat(co.amount)>0?'+'+fmt(parseFloat(co.amount)):'No additional cost'}</div>
+    </div>`
+  document.getElementById('sign-name').value = ''
+  openModal('sign-modal')
+}
+
+function signCO(){
+  const name = document.getElementById('sign-name').value.trim()
+  if(!name){ showToast('⚠ Please enter your full name to sign'); return }
+  DB.signCO(_pendingCOProjectId, _pendingCOId, name)
+  closeModal('sign-modal')
+  showToast('✓ Change order approved and signed')
+  renderApp()
+}
+
+function rejectCO(){
+  const reason = prompt('Reason for declining (optional):') || ''
+  DB.rejectCO(_pendingCOProjectId, _pendingCOId, reason)
+  closeModal('sign-modal')
+  showToast('Change order declined')
+  renderApp()
+}
+
+// ── Photos ──
+function openPhotoModal(pid, phaseId){
+  _pendingPhotoProjectId = pid
+  _pendingPhotoPhaseId = phaseId
+  const ph = PHASES.find(p=>p.id===phaseId)
+  document.getElementById('photo-modal-title').textContent = `Add Photo — Phase ${phaseId}`
+  document.getElementById('photo-modal-sub').textContent = ph
+    ? `Attach a photo to "${ph.name}". Images are resized to max 800px automatically.`
+    : 'Select a photo to attach.'
+  document.getElementById('photo-file').value = ''
+  document.getElementById('photo-caption').value = ''
+  openModal('photo-modal')
+}
+
+function submitPhoto(){
+  const file = document.getElementById('photo-file').files[0]
+  if(!file){ showToast('⚠ Please select a photo'); return }
+  const caption = document.getElementById('photo-caption').value.trim()
+  const reader = new FileReader()
+  reader.onload = e => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      const MAX = 800
+      let w=img.width, h=img.height
+      if(w>MAX){ h=Math.round(h*MAX/w); w=MAX }
+      canvas.width=w; canvas.height=h
+      canvas.getContext('2d').drawImage(img,0,0,w,h)
+      const dataUrl = canvas.toDataURL('image/jpeg',0.82)
+      try {
+        DB.addPhoto(_pendingPhotoProjectId, _pendingPhotoPhaseId, dataUrl, caption)
+        closeModal('photo-modal')
+        showToast('✓ Photo added to phase')
+        renderApp()
+        // scroll to phase
+        setTimeout(()=>{ document.getElementById('ph-'+_pendingPhotoPhaseId)?.scrollIntoView({behavior:'smooth',block:'nearest'}) },100)
+      } catch(err){
+        alert('Storage limit reached. Try deleting older photos or using smaller images.\n\nTip: Consider hosting photos externally (Google Drive, Dropbox) and adding links in the caption.')
+      }
+    }
+    img.src = e.target.result
+  }
+  reader.readAsDataURL(file)
+}
+
+function deletePhotoEvt(e, pid, phaseId, photoId){
+  e.stopPropagation()
+  if(!confirm('Delete this photo?')) return
+  DB.deletePhoto(pid, phaseId, photoId)
+  showToast('Photo deleted')
+  renderApp()
+}
+
+function viewPhoto(url){
+  document.getElementById('lightbox-img').src = url
+  openModal('lightbox')
+}
+
+function copyCustomerLink(pid){
+  const url = `${location.origin}${location.pathname}#p/${pid}/c`
+  navigator.clipboard.writeText(url)
+    .then(()=>showToast('✓ Customer link copied to clipboard'))
+    .catch(()=>prompt('Copy this link to share with your client:',url))
+}
+
+// ── Modal helpers ──
+function openModal(id){ document.getElementById(id).classList.add('open') }
+function closeModal(id){ document.getElementById(id).classList.remove('open') }
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay=>{
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) overlay.classList.remove('open') })
+})
+
+// ── Toast ──
+let _toastTimer = null
+function showToast(msg){
+  const t = document.getElementById('toast')
+  t.textContent = msg; t.classList.add('show')
+  clearTimeout(_toastTimer)
+  _toastTimer = setTimeout(()=>t.classList.remove('show'),3200)
+}
+
+// ── Utils ──
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+function fmtDate(ts){ return ts?new Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—' }
+
+// ════════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', parseHash)
 </script>
 </body>
 </html>
