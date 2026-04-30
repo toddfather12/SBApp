@@ -361,8 +361,55 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);m
   .form-grid{grid-template-columns:1fr}
   .tb-title{display:none}
   .tb-right{gap:5px}
-  .btn-sm{padding:4px 8px;font-size:10px}
-  .vtab{padding:4px 8px;font-size:11px}
+  .btn-sm{padding:5px 10px;font-size:11px}
+  .vtab{padding:5px 10px;font-size:11px}
+  .modal{padding:22px 22px}
+  .co-meta-row{flex-direction:column;gap:4px;align-items:flex-start}
+  .toast{white-space:normal;text-align:center;max-width:90vw}
+  .form-wrap{margin:16px;padding:24px 18px}
+  .ctable{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
+@media(max-width:480px){
+  /* Topbar wraps to two rows on small phones */
+  .topbar{height:auto;min-height:54px;flex-wrap:wrap;padding:8px 12px;gap:6px}
+  .tb-brand{width:100%}
+  .tb-right{width:100%;gap:4px}
+  .vtabs{flex:1}
+  .vtab{flex:1;text-align:center;padding:6px 4px;font-size:10px}
+  .btn-sm{font-size:10px;padding:6px 8px}
+  /* Phase strip: hide duration, allow title to breathe */
+  .strip{height:auto;min-height:50px;padding:10px 12px;gap:8px}
+  .ptitle{font-size:15px}
+  .pdur{display:none}
+  .strip-flags{flex-wrap:wrap;gap:3px}
+  /* Bump up tiny font sizes for readability */
+  .sf{font-size:10px;padding:4px 7px}
+  .co-status-pill{font-size:10px;padding:4px 8px}
+  .blab{font-size:11px}
+  .cf{font-size:10px}
+  /* Increase tap target height for tasks and decisions */
+  .task{min-height:44px;padding:10px}
+  .dec-item{min-height:44px;padding:10px}
+  .tcb,.dec-cb{width:22px;height:22px;font-size:12px}
+  /* Budget panel */
+  .bp-num{font-size:20px}
+  .sn{font-size:22px}
+  /* Modal: full-width, stacked buttons */
+  .modal-overlay{padding:8px}
+  .modal{padding:18px 16px;border-radius:8px;max-height:95vh}
+  .modal-btns{flex-direction:column}
+  .modal-btns .btn{width:100%;justify-content:center}
+  /* proj-meta: stack fields vertically */
+  .proj-meta{flex-direction:column;align-items:flex-start;gap:8px;padding:10px 12px}
+  .role-badge{margin-left:0}
+  /* CO item: pill stacks above body */
+  .co-item{flex-direction:column;gap:6px}
+  .co-status-pill{margin-top:0}
+  /* Always show photo delete button on touch devices */
+  .photo-del{opacity:1}
+  /* Form */
+  .form-wrap{margin:12px;padding:18px 14px}
+  .breadcrumb{padding:8px 12px}
 }
 @media print{
   .topbar,.breadcrumb,.legend,.overall-progress,.co-panel,.budget-panel,
