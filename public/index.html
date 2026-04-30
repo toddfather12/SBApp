@@ -948,9 +948,23 @@ async function renderApp(){
       API.getDecisions(STATE.projectId),
     ])
     if(!proj||proj.error){ navigate(''); return }
-    STATE._project=proj; STATE._cos=cos; STATE._budget=budget
+    // Auto-seed budget items for projects created before this feature existed
+    if(!budget.length){
+      const items = []
+      for(const ph of PHASES)
+        for(const c of (ph.pm.costs||[]))
+          items.push({phase_id:ph.id, item:c.item, amt:c.amt??null, note:c.note||''})
+      try {
+        await fetch(`/api/projects/${STATE.projectId}/budget/seed`,{
+          method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({budget_items:items})
+        })
+        const fresh = await API.getBudget(STATE.projectId)
+        STATE._budget = fresh
+      } catch(e){ STATE._budget = [] }
+    } else { STATE._budget = budget }
+    STATE._project=proj; STATE._cos=cos
     STATE._tasks=tasks;  STATE._decisions=decisions
-    app.innerHTML = renderProject(proj,cos,budget,tasks,decisions,STATE.role)
+    app.innerHTML = renderProject(proj,STATE._cos,STATE._budget,STATE._tasks,STATE._decisions,STATE.role)
   }
 }
 

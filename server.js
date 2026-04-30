@@ -85,6 +85,20 @@ app.put('/api/projects/:id/budget/:item_id', async (req, res) => {
   }
 });
 
+// Backfill budget items for projects created before the budget_items table existed
+app.post('/api/projects/:id/budget/seed', async (req, res) => {
+  try {
+    const existing = await db.getBudgetItems(req.params.id);
+    if (existing.length > 0) return res.json({ ok: true, seeded: 0, message: 'Already has budget items' });
+    const { budget_items } = req.body;
+    if (!budget_items || !budget_items.length) return res.status(400).json({ error: 'budget_items required' });
+    await db.seedBudgetItems(req.params.id, budget_items);
+    res.json({ ok: true, seeded: budget_items.length });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 // ── CHANGE ORDERS ─────────────────────────────────────────────────
 
 app.get('/api/projects/:id/cos', async (req, res) => {
