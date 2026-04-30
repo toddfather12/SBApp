@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Southern Bay Construction — Your Project</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --dark:#1A2733;--mid:#2C3E50;--terra:#B85038;--amber:#C49A3C;
+  --cream:#F7F2EB;--sand:#EDE5D8;--white:#FFFFFF;
+  --txt:#2C3440;--txt-m:#5A6A7A;--txt-l:#8A9AB0;
+  --border:#D5C9BC;--green:#3A6A5A;--green-l:#EAF3E8;
+  --pm-bg:#F0F6FA;--pm-bdr:#C8DCE8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);min-height:100vh}
+.topbar{background:var(--dark);padding:0 24px;display:flex;align-items:center;
+  justify-content:space-between;height:54px;position:sticky;top:0;z-index:100;
+  border-bottom:3px solid var(--terra);gap:12px}
+.tb-brand{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.tb-logo{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;
+  color:var(--terra);letter-spacing:2px}
+.tb-sep{width:1px;height:18px;background:#2C3E50;flex-shrink:0}
+.tb-title{font-family:'DM Serif Display';font-size:16px;color:var(--white);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+.tb-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.role-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;
+  padding:3px 10px;border-radius:4px;background:#F0F6FA;color:#4A8AAA;border:1px solid var(--pm-bdr)}
+.btn{padding:6px 14px;border-radius:5px;font-size:12px;font-weight:500;
+  cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s;
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-primary{background:var(--terra);color:#fff}
+.btn-primary:hover{background:#C86048}
+.btn-outline{background:transparent;color:var(--txt-l);border:1px solid #2C3E50}
+.btn-outline:hover{background:#2C3E50;color:#fff}
+.btn-danger{background:transparent;color:#D48060;border:1px solid #4A2510}
+.btn-danger:hover{background:#2A1510;color:#E89070}
+.btn-sm{padding:4px 10px;font-size:11px}
+.breadcrumb{background:var(--sand);border-bottom:1px solid var(--border);
+  padding:8px 24px;font-size:12px;color:var(--txt-m)}
+.cu-welcome{background:linear-gradient(135deg,#1A2733 0%,#2C3E50 100%);
+  padding:24px;border-bottom:3px solid var(--terra)}
+.cu-welcome-inner{max-width:700px}
+.cu-welcome-label{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;
+  color:var(--terra);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.cu-welcome-title{font-family:'DM Serif Display';font-size:26px;color:var(--white);margin-bottom:8px}
+.cu-welcome-sub{font-size:13px;color:#6A8AA0;line-height:1.6}
+.proj-meta{background:var(--sand);border-bottom:1px solid var(--border);
+  padding:10px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.pm-field{display:flex;align-items:center;gap:6px}
+.pm-label{font-size:10px;font-weight:600;color:var(--terra);text-transform:uppercase;letter-spacing:1.2px}
+.pm-val{font-size:13px;font-weight:500;color:var(--txt)}
+.co-panel{margin:16px 24px 0;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.co-panel-header{background:var(--dark);padding:10px 18px;display:flex;align-items:center;justify-content:space-between}
+.co-panel-title{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;
+  color:#6A90A8;letter-spacing:2px;text-transform:uppercase}
+.co-list{display:flex;flex-direction:column}
+.co-item{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px}
+.co-item:last-child{border-bottom:none}
+.co-item.pending{background:#FFFDF5}
+.co-item.signed{background:#F5FBF7}
+.co-item.rejected{background:#FEF9F8}
+.co-status-pill{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;
+  padding:3px 8px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.csp-pending{background:#FFF3CC;color:#8A6A00;border:1px solid #E8C84A}
+.csp-signed{background:var(--green-l);color:var(--green);border:1px solid #B8D8C8}
+.csp-rejected{background:#FEE8E0;color:var(--terra);border:1px solid #E8C0B0}
+.co-body{flex:1;min-width:0}
+.co-name{font-size:13px;font-weight:600;color:var(--txt);margin-bottom:3px}
+.co-desc{font-size:12px;color:var(--txt-m);line-height:1.5;margin-bottom:8px}
+.co-meta-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.co-amount{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--terra)}
+.co-meta-txt{font-size:11px;color:var(--txt-l)}
+.co-sig-line{font-size:11px;color:var(--green);font-weight:500;margin-top:5px}
+.co-rej-line{font-size:11px;color:var(--terra);margin-top:5px}
+.co-empty{padding:20px 18px;text-align:center;font-size:13px;color:var(--txt-l)}
+.phases{padding:16px 24px 8px;display:flex;flex-direction:column;gap:10px}
+.phase{border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--white)}
+.phase:hover{box-shadow:0 2px 14px rgba(0,0,0,.08)}
+.phase.open{box-shadow:0 4px 22px rgba(0,0,0,.11)}
+.strip{display:flex;align-items:center;gap:14px;padding:0 18px;height:54px;
+  cursor:pointer;user-select:none;background:var(--dark);
+  border-bottom:2px solid transparent;transition:background .15s,border-color .15s}
+.strip:hover{background:#20323F}
+.phase.open .strip{border-bottom-color:var(--terra)}
+.pnum{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;
+  color:var(--terra);background:rgba(184,80,56,.18);border:1px solid rgba(184,80,56,.35);
+  padding:4px 11px;border-radius:4px;letter-spacing:1px;white-space:nowrap;flex-shrink:0}
+.ptitle{font-family:'DM Serif Display';font-size:17px;color:var(--white);
+  flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pdur{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#6A8AA0;
+  background:#0F1C26;padding:3px 9px;border-radius:4px;white-space:nowrap;flex-shrink:0}
+.strip-flags{display:flex;gap:5px;flex-shrink:0}
+.sf{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;padding:3px 7px;border-radius:3px;white-space:nowrap}
+.sf-p{background:#102018;color:#5AA882;border:1px solid #204030}
+.sf-co{background:#2A2208;color:#D4A840;border:1px solid #4A3A10}
+.chev{color:#4A6A7A;font-size:11px;flex-shrink:0;transition:transform .2s}
+.phase.open .chev{transform:rotate(180deg);color:var(--terra)}
+.cb{padding:16px 18px 20px;background:var(--white)}
+.blk{margin-bottom:16px} .blk:last-child{margin-bottom:0}
+.blab{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px;color:var(--terra)}
+.btxt{font-size:13px;color:var(--txt-m);line-height:1.65}
+.comm{display:flex;gap:10px;align-items:flex-start;padding:7px 10px;border-radius:5px;
+  background:var(--green-l);border-left:3px solid var(--green);
+  margin-bottom:6px;font-size:12.5px;color:var(--txt)}
+.cf{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;
+  color:var(--green);flex-shrink:0;padding-top:2px;min-width:60px}
+.pay{display:flex;align-items:flex-start;gap:8px;margin-top:6px;
+  background:var(--green-l);border:1px solid #B8D8C8;border-radius:5px;
+  padding:8px 12px;font-size:12.5px;font-weight:600;color:var(--green);line-height:1.45}
+.mstn{display:flex;gap:8px;align-items:flex-start;margin-top:10px;
+  padding:7px 10px;background:#F0F8F4;border-radius:5px;
+  border-left:3px solid var(--green);font-size:12.5px;font-weight:500;color:var(--green);line-height:1.4}
+.dec-item{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;
+  border-radius:6px;border:1px solid var(--border);background:var(--white);
+  margin-bottom:6px;font-size:13px;color:var(--txt-m);cursor:pointer;transition:all .1s}
+.dec-item:hover{border-color:#B8C8B8;background:#F8FCF8}
+.dec-item.confirmed{background:var(--green-l);border-color:#B8D8C8;color:var(--txt)}
+.dec-cb{width:17px;height:17px;border-radius:3px;flex-shrink:0;margin-top:1px;
+  border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;background:white;transition:all .12s;color:white}
+.dec-item.confirmed .dec-cb{background:var(--green);border-color:var(--green)}
+.dec-text{flex:1}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+  z-index:999;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:12px;padding:28px 32px;
+  max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);max-height:90vh;overflow-y:auto}
+.modal h3{font-family:'DM Serif Display';font-size:22px;color:var(--txt);margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--txt-m);margin-bottom:22px;line-height:1.5}
+.modal-body{display:flex;flex-direction:column;gap:14px;margin-bottom:24px}
+.modal-btns{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.form-field{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:10px;font-weight:600;color:var(--terra);text-transform:uppercase;letter-spacing:1.2px}
+.form-input{font-family:'DM Sans',sans-serif;font-size:14px;color:var(--txt);
+  background:var(--sand);border:1px solid var(--border);border-radius:6px;
+  padding:9px 12px;outline:none;transition:border-color .15s;width:100%}
+.form-input:focus{border-color:var(--terra);background:var(--white)}
+.co-review-box{background:var(--sand);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:20px}
+.co-review-title{font-family:'DM Serif Display';font-size:18px;color:var(--txt);margin-bottom:12px}
+.co-review-row{display:flex;justify-content:space-between;align-items:flex-start;
+  font-size:13px;color:var(--txt-m);padding:6px 0;border-bottom:1px dashed #E8DDD0;gap:12px}
+.co-review-row:last-child{border-bottom:none}
+.co-review-val{font-weight:600;color:var(--txt);text-align:right;flex-shrink:0}
+.co-amount-display{font-family:'DM Serif Display';font-size:32px;color:var(--terra);text-align:center;padding:16px 0 8px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);
+  background:var(--dark);color:#fff;padding:10px 22px;border-radius:6px;
+  font-size:13px;z-index:9999;transition:transform .3s ease;white-space:nowrap;
+  border-left:3px solid var(--green);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.error-page{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:80vh;text-align:center;padding:40px}
+.error-icon{font-size:48px;margin-bottom:16px}
+.error-h{font-family:'DM Serif Display';font-size:28px;color:var(--txt);margin-bottom:12px}
+.error-p{font-size:14px;color:var(--txt-m);line-height:1.6;max-width:400px}
+@media(max-width:768px){
+  .phases{padding:12px 14px 8px}
+  .topbar,.proj-meta,.breadcrumb,.co-panel{padding-left:14px;padding-right:14px}
+  .co-panel{margin-left:14px;margin-right:14px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="tb-brand">
+      <span class="tb-logo">Southern Bay Construction</span>
+    </div>
+  </div>
+  <div style="padding:60px 24px;text-align:center;color:var(--txt-l);font-size:14px">Loading your project…</div>
+</div>
+
+<!-- CO SIGN MODAL -->
+<div class="modal-overlay" id="sign-modal">
+  <div class="modal">
+    <h3 id="sign-modal-title">Review Change Order</h3>
+    <p class="modal-sub">Review the details below carefully. Your signature is legally binding.</p>
+    <div id="sign-modal-detail"></div>
+    <div class="modal-body">
+      <div class="form-field">
+        <label class="form-label">Full Name (electronic signature)</label>
+        <input class="form-input" id="sign-name" placeholder="Type your full name to sign">
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-danger" onclick="rejectCO()">Decline</button>
+      <button class="btn btn-outline" onclick="closeModal('sign-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="signCO()">Sign &amp; Approve</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Customer-facing phase definitions (cu content only — no PM tasks or costs)
+const CU_PHASES = [
+  {id:1,name:"Pre-Construction & Planning",dur:"Days 1–14",flags:[],
+   what:"Before a shovel hits the ground, we've reviewed your plans, confirmed your lot, and put every long-lead-time order in motion. You'll know exactly what we need from you and when.",
+   decisions:["Confirm architectural plans are finalized and permit-ready","Confirm lender contact and construction loan draw schedule","Window selections — style, color, manufacturer — needed within 5 days of contract","Exterior door selections — confirm with Damian before ordering","Truss design approval — engineered trusses require 3–4 week lead time","Any specialty or custom framing items — identify now"],
+   comms:[{f:"Day 1",t:"Kickoff email: project schedule, PM contact, open decisions list"},{f:"Day 3",t:"Window / door / truss selection follow-up — PM reaches out if not received"},{f:"Weekly",t:"Friday update throughout pre-construction"}],
+   pay:null,mstn:"Plans reviewed. Permit submitted. Windows, doors, and trusses ordered."},
+  {id:2,name:"Site Prep & Temporary Services",dur:"Weeks 2–3",flags:[],
+   what:"The lot is prepared and temporary utilities are established. You may not see dramatic activity yet, but the site is being set up correctly.",
+   decisions:["Confirm any lot grading preferences or drainage concerns","Septic system location and design approval (if applicable)"],
+   comms:[{f:"Milestone",t:"Site prep complete — photo update, confirm ready for foundation"},{f:"Weekly",t:"Friday update"}],
+   pay:null,mstn:"Lot cleared. Temp power and water established. Dumpster and toilet on site."},
+  {id:3,name:"Foundation & Slab",dur:"Weeks 3–6",flags:["pay"],
+   what:"Your home's foundation is formed and poured. By the end you can walk the footprint of your home for the first time. Your first payment draw happens here.",
+   decisions:["Garage slab height confirmation — affects driveway grade and drainage","Any last-minute changes to footprint or room placement before forms are set"],
+   comms:[{f:"Milestone",t:"Photo of completed slab — first look at your home's footprint"},{f:"Payment",t:"Payment #1 invoice sent to you and lender on pour day"},{f:"Weekly",t:"Friday update — flag any weather or soil surprises immediately"}],
+   pay:"Payment #1 due at slab pour. Invoice sent to client and lender simultaneously.",mstn:"Slab poured and cured. Pre-pour inspection passed. Ready for framing."},
+  {id:4,name:"Framing & Roof",dur:"Weeks 6–11",flags:[],
+   what:"Walls rise, the roof takes shape, and by the end your home is dried in and protected from weather. You'll see room sizes in three dimensions for the first time. Walk-throughs are encouraged.",
+   decisions:["Confirm window placement in framing before walls are closed in — last chance","Confirm any structural changes from plans before framing begins"],
+   comms:[{f:"Milestone",t:"Photo update when walls are up — first look at your floor plan in 3D"},{f:"Walk",t:"Walk-through invited once framing is complete — see the space before it closes"},{f:"Weekly",t:"Friday update with framing progress photos"}],
+   pay:null,mstn:"House dried in. Windows and exterior doors installed. Fortification photos taken."},
+  {id:5,name:"MEP Rough-In & Inspections",dur:"Weeks 10–14",flags:[],
+   what:"Plumbing, electrical, and HVAC are roughed in before drywall covers them. Every outlet, light fixture, vent, and pipe is placed now. This is the last chance to move anything. A pre-sheetrock walk is strongly encouraged.",
+   decisions:["Electrical panel location and service size confirmation","All light fixture locations, ceiling fan placements, and outlet counts","HVAC zone layout — single vs. dual zone","Fireplace type and location (if applicable)","Smart-home pre-wire: speakers, security cameras, ethernet, EV charger"],
+   comms:[{f:"Walk",t:"Pre-sheetrock walk — strongly recommended, review all rough-in locations with PM"},{f:"Weekly",t:"Friday update"}],
+   pay:null,mstn:"All rough-in inspections passed. Final framing inspection complete. Ready for insulation."},
+  {id:6,name:"Sheetrock & Exterior Shell",dur:"Weeks 14–18",flags:[],
+   what:"Drywall transforms the framed shell into rooms. Simultaneously, exterior cladding — brick, siding, soffit, and fascia — goes on outside. Paint color decisions are needed now.",
+   decisions:["Paint colors for all interior rooms — needed before painter schedules","Ceiling texture preference: smooth, knockdown, or skip trowel","Exterior paint colors (if Hardie/vinyl) — confirm before exterior painting","Window and door glass cover specifications (fortification)"],
+   comms:[{f:"Milestone",t:"Photo update when sheetrock is hung — rooms feel real for the first time"},{f:"Weekly",t:"Friday update"}],
+   pay:null,mstn:"Sheetrock hung and finished. Exterior cladding complete. Ready for cabinets and trim."},
+  {id:7,name:"Cabinets, Vanities & Tops",dur:"Weeks 17–21",flags:[],
+   what:"Cabinets and vanities transform kitchens and bathrooms into functional spaces. Countertop templating happens immediately after cabinet install — selections and lead times matter.",
+   decisions:["Cabinet hardware — knobs and pulls — ordered separately from cabinet boxes","Countertop / granite material, color, and edge profile","Vanity selections confirmed — measuring happens this phase"],
+   comms:[{f:"Milestone",t:"Photo when cabinets are installed — first look at kitchen and bathrooms"},{f:"Weekly",t:"Friday update"}],
+   pay:null,mstn:"Cabinets and vanities installed. Countertops templated, fabricated, and installed."},
+  {id:8,name:"Floors, Trim & Interior Finishes",dur:"Weeks 20–24",flags:["pay"],
+   what:"Flooring goes in, trim carpenter completes interior doors and millwork, and the home comes together visually. Your second payment draw happens here.",
+   decisions:["Flooring: carpet in bedrooms, LVP in main areas — confirm species/color","Tile selections for any tiled areas","Lock and hardware selections — confirm finish and style"],
+   comms:[{f:"Walk",t:"Walk-through encouraged — first time the home looks truly finished"},{f:"Milestone",t:"50% completion draw coordinated with lender bank inspection"},{f:"Weekly",t:"Friday update with photos"}],
+   pay:"Payment #2 at 50% completion per lender bank inspection. Invoice to client and lender.",mstn:"Floors installed. Trim complete. Interior finishes done. Ready for MEP trim-out."},
+  {id:9,name:"MEP Trim-Out, Energy Tests & Final Inspections",dur:"Weeks 23–26",flags:[],
+   what:"Plumbing, electrical, and HVAC are trimmed out. Your home passes its energy efficiency test. We do a punch-list walk together — your list, your expectations. Nothing moves to final inspection until you're satisfied.",
+   decisions:["Confirm all plumbing and electrical fixture selections are on-site","Any last-minute items must be documented as change orders before work begins"],
+   comms:[{f:"Walk",t:"Punch-list walk — you flag everything, we document and complete before inspection"},{f:"Milestone",t:"Final inspection date confirmed — you'll be notified in advance"}],
+   pay:null,mstn:"All MEP trim-out complete. Blower door test passed. All final inspections passed. CO applied for."},
+  {id:10,name:"Handoff & Close-Out",dur:"Final week",flags:["pay"],
+   what:"Certificate of Occupancy in hand. We walk every room together, review all systems, and hand over your documentation package. Interior deep clean is complete. You receive your keys when you're satisfied — not before.",
+   decisions:[],
+   comms:[{f:"Final walk",t:"Homeowner orientation: every system, every warranty, year-one expectations"},{f:"30-day",t:"Follow-up call from your PM after move-in to answer any questions"}],
+   pay:"Final payment at Certificate of Occupancy. Invoice to client and lender.",mstn:"Keys in hand. Clean home. Full documentation delivered. Project complete."},
+]
+
+const fmt = n => '$'+Number(n).toLocaleString()
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+const fmtDate = val => {
+  if(!val) return '—'
+  const d = new Date(typeof val==='number' ? val : String(val).replace(' ','T')+'Z')
+  return isNaN(d) ? '—' : d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+}
+
+// Token comes from URL path: /c/<token>
+const TOKEN = window.location.pathname.replace(/^\/c\//,'').split('/')[0]
+
+let STATE = { project:null, cos:[], decisions:{}, openPhases:new Set() }
+let _pendingCOId = null
+
+async function load(){
+  if(!TOKEN){
+    showError('No project link found. Please check your URL and try again.')
+    return
+  }
+  try {
+    const r = await fetch(`/api/customer/${TOKEN}`)
+    if(!r.ok){ showError('This link is invalid or has expired. Please contact your project manager for a new link.'); return }
+    const data = await r.json()
+    if(data.error){ showError(data.error); return }
+    STATE.project   = data.project
+    STATE.cos       = data.cos
+    STATE.decisions = data.decisions || {}
+    render()
+  } catch(e){
+    showError('Unable to load your project. Please check your connection and try again.')
+  }
+}
+
+function showError(msg){
+  document.getElementById('app').innerHTML = `
+    <div class="topbar">
+      <div class="tb-brand">
+        <span class="tb-logo">Southern Bay Construction</span>
+      </div>
+    </div>
+    <div class="error-page">
+      <div class="error-icon">🔒</div>
+      <div class="error-h">Link Unavailable</div>
+      <p class="error-p">${esc(msg)}</p>
+    </div>`
+}
+
+function render(){
+  const proj = STATE.project
+  const cos  = STATE.cos
+  const pendingCOs = cos.filter(c=>c.status==='pending').length
+
+  const coPanel = cos.length ? `<div class="co-panel">
+    <div class="co-panel-header">
+      <span class="co-panel-title">Change Orders</span>
+      <span style="font-size:11px;color:#5A8AA0">${pendingCOs} pending · ${cos.filter(c=>c.status==='signed').length} approved</span>
+    </div>
+    <div class="co-list">
+      ${cos.map(co=>{
+        const ph = CU_PHASES.find(p=>p.id===parseInt(co.phase_id))
+        const phName = ph?ph.name:`Phase ${co.phase_id}`
+        const pill = {
+          pending:`<span class="co-status-pill csp-pending">Pending Your Approval</span>`,
+          signed: `<span class="co-status-pill csp-signed">Approved</span>`,
+          rejected:`<span class="co-status-pill csp-rejected">Declined</span>`
+        }[co.status]
+        const signBtn = co.status==='pending'
+          ? `<button class="btn btn-primary btn-sm" onclick="openSignModal('${co.id}')">Review &amp; Sign</button>` : ''
+        const footer = co.status==='signed'
+          ? `<div class="co-sig-line">✓ Signed by ${esc(co.signed_by)} · ${fmtDate(co.signed_at)}</div>`
+          : co.status==='rejected'
+          ? `<div class="co-rej-line">✕ Declined ${fmtDate(co.rejected_at)}${co.rejection_reason?' — "'+esc(co.rejection_reason)+'"':''}</div>`
+          : ''
+        return `<div class="co-item ${co.status}">
+          <div>${pill}</div>
+          <div class="co-body">
+            <div class="co-name">${esc(co.title)}</div>
+            ${co.description?`<div class="co-desc">${esc(co.description)}</div>`:''}
+            <div class="co-meta-row">
+              <span class="co-amount">${co.amount&&parseFloat(co.amount)>0?'+'+fmt(parseFloat(co.amount)):'No cost change'}</span>
+              <span class="co-meta-txt">Phase ${co.phase_id}: ${phName}</span>
+              <span class="co-meta-txt">Requested ${fmtDate(co.requested_at)}</span>
+              ${signBtn}
+            </div>
+            ${footer}
+          </div>
+        </div>`
+      }).join('')}
+    </div>
+  </div>` : ''
+
+  const phasesHtml = CU_PHASES.map(ph=>{
+    const isOpen = STATE.openPhases.has(ph.id)
+    const phaseCOs = cos.filter(co=>parseInt(co.phase_id)===ph.id&&co.status==='pending').length
+    const payFlag = ph.flags.includes('pay') ? `<span class="sf sf-p">$ PAYMENT</span>` : ''
+    const coFlag  = phaseCOs ? `<span class="sf sf-co">⚠ ${phaseCOs} CO</span>` : ''
+
+    const strip = `<div class="strip" onclick="togglePhase(${ph.id})">
+      <span class="pnum">PHASE ${String(ph.id).padStart(2,'0')}</span>
+      <span class="ptitle">${ph.name}</span>
+      <span class="pdur">${ph.dur}</span>
+      <div class="strip-flags">${payFlag}${coFlag}</div>
+      <span class="chev">${isOpen?'▲':'▼'}</span>
+    </div>`
+
+    if(!isOpen) return `<div class="phase" id="ph-${ph.id}">${strip}</div>`
+
+    const decHtml = ph.decisions.length ? `<div class="blk">
+      <div class="blab">Decisions needed from you</div>
+      <div>
+        ${ph.decisions.map((d,i)=>{
+          const k=`${ph.id}_${i}`
+          const done = STATE.decisions&&STATE.decisions[k]
+          return `<div class="dec-item${done?' confirmed':''}" onclick="toggleDecision(${ph.id},${i})">
+            <div class="dec-cb">${done?'✓':''}</div>
+            <span class="dec-text">${esc(d)}</span>
+          </div>`
+        }).join('')}
+      </div>
+    </div>` : ''
+
+    const commHtml = `<div class="blk">
+      <div class="blab">Communication checkpoints</div>
+      ${ph.comms.map(c=>`<div class="comm"><span class="cf">${c.f}</span><span>${esc(c.t)}</span></div>`).join('')}
+    </div>`
+
+    const payHtml = ph.pay ? `<div class="blk"><div class="pay">💰 ${esc(ph.pay)}</div></div>` : ''
+
+    const phaseCOItems = cos.filter(co=>parseInt(co.phase_id)===ph.id)
+    const phaseCOHtml = phaseCOItems.length ? `<div class="blk">
+      <div class="blab">Change Orders — This Phase</div>
+      ${phaseCOItems.map(co=>{
+        const pill = {
+          pending:`<span class="co-status-pill csp-pending">Pending Your Approval</span>`,
+          signed: `<span class="co-status-pill csp-signed">Approved</span>`,
+          rejected:`<span class="co-status-pill csp-rejected">Declined</span>`
+        }[co.status]
+        const signBtn = co.status==='pending'
+          ? `<button class="btn btn-primary btn-sm" style="margin-top:6px" onclick="openSignModal('${co.id}')">Review &amp; Sign</button>` : ''
+        return `<div class="co-item ${co.status}" style="border-radius:6px;margin-bottom:6px">
+          <div>${pill}</div>
+          <div class="co-body">
+            <div class="co-name">${esc(co.title)}</div>
+            ${co.description?`<div class="co-desc">${esc(co.description)}</div>`:''}
+            <div class="co-amount" style="margin-top:4px">${co.amount&&parseFloat(co.amount)>0?'+'+fmt(parseFloat(co.amount)):'No cost change'}</div>
+            ${signBtn}
+          </div>
+        </div>`
+      }).join('')}
+    </div>` : ''
+
+    return `<div class="phase open" id="ph-${ph.id}">${strip}
+      <div class="cb">
+        <div class="blk"><div class="blab">What's happening</div><div class="btxt">${esc(ph.what)}</div></div>
+        ${decHtml}${commHtml}${payHtml}${phaseCOHtml}
+        <div class="mstn">✓ ${esc(ph.mstn)}</div>
+      </div>
+    </div>`
+  }).join('')
+
+  document.getElementById('app').innerHTML = `
+    <div class="topbar">
+      <div class="tb-brand">
+        <span class="tb-logo">SBC</span>
+        <div class="tb-sep" style="width:1px;height:18px;background:#2C3E50;flex-shrink:0"></div>
+        <span class="tb-title">${esc(proj.name)}</span>
+      </div>
+      <div class="tb-right">
+        <span class="role-badge">📋 Customer Portal</span>
+      </div>
+    </div>
+    <div class="breadcrumb"><span>${esc(proj.name)}</span> › <span>Customer Portal</span></div>
+    <div class="proj-meta">
+      <div class="pm-field"><span class="pm-label">Client</span><span class="pm-val">${esc(proj.client_name)||'—'}</span></div>
+      <div class="pm-field"><span class="pm-label">Address</span><span class="pm-val">${esc(proj.address)||'—'}</span></div>
+      <div class="pm-field"><span class="pm-label">Contract</span><span class="pm-val">${proj.contract_date||'—'}</span></div>
+      <div class="pm-field"><span class="pm-label">Est. Complete</span><span class="pm-val">${proj.est_completion||'—'}</span></div>
+      <div class="pm-field"><span class="pm-label">PM</span><span class="pm-val">${esc(proj.pm)||'—'}</span></div>
+    </div>
+    <div class="cu-welcome">
+      <div class="cu-welcome-inner">
+        <div class="cu-welcome-label">Your Project Portal</div>
+        <div class="cu-welcome-title">${esc(proj.name)}</div>
+        <div class="cu-welcome-sub">
+          Your PM is <strong>${esc(proj.pm)||'your project manager'}</strong>.
+          Below you'll find each phase of your build, decisions we need from you,
+          and any change orders requiring your approval. Check off decisions as you confirm them.
+        </div>
+      </div>
+    </div>
+    ${coPanel}
+    <div class="phases">${phasesHtml}</div>`
+}
+
+function togglePhase(id){
+  STATE.openPhases.has(id) ? STATE.openPhases.delete(id) : STATE.openPhases.add(id)
+  render()
+}
+
+async function toggleDecision(phaseId, decIdx){
+  const k = `${phaseId}_${decIdx}`
+  const was = STATE.decisions&&STATE.decisions[k]
+  if(!STATE.decisions) STATE.decisions={}
+  STATE.decisions[k] = !was
+  render()
+  try {
+    await fetch(`/api/customer/${TOKEN}/decisions`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({phase_id:phaseId,dec_index:decIdx,confirmed:!was})
+    })
+  } catch(e){ STATE.decisions[k]=was; render(); showToast('⚠ Failed to save') }
+}
+
+function openSignModal(coId){
+  _pendingCOId = coId
+  const co = STATE.cos.find(c=>c.id===coId); if(!co) return
+  const ph = CU_PHASES.find(p=>p.id===parseInt(co.phase_id))
+  document.getElementById('sign-modal-title').textContent = co.title
+  document.getElementById('sign-modal-detail').innerHTML = `
+    <div class="co-review-box">
+      <div class="co-review-title">${esc(co.title)}</div>
+      ${co.description?`<div class="co-review-row"><span>Description</span><span class="co-review-val">${esc(co.description)}</span></div>`:''}
+      <div class="co-review-row"><span>Phase</span><span class="co-review-val">${ph?ph.name:'Phase '+co.phase_id}</span></div>
+      <div class="co-review-row"><span>Requested</span><span class="co-review-val">${fmtDate(co.requested_at)}</span></div>
+      <div class="co-amount-display">${co.amount&&parseFloat(co.amount)>0?'+'+fmt(parseFloat(co.amount)):'No additional cost'}</div>
+    </div>`
+  document.getElementById('sign-name').value = ''
+  document.getElementById('sign-modal').classList.add('open')
+}
+
+async function signCO(){
+  const name = document.getElementById('sign-name').value.trim()
+  if(!name){ showToast('⚠ Please type your full name to sign'); return }
+  try {
+    const r = await fetch(`/api/customer/${TOKEN}/cos/${_pendingCOId}/sign`,{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({signed_by:name})
+    })
+    if(!r.ok) throw new Error()
+    const co = STATE.cos.find(c=>c.id===_pendingCOId)
+    if(co){ co.status='signed'; co.signed_by=name; co.signed_at=new Date().toISOString() }
+    closeModal('sign-modal')
+    showToast('✓ Change order signed — thank you')
+    render()
+  } catch(e){ showToast('⚠ Failed to sign. Please try again.') }
+}
+
+async function rejectCO(){
+  const reason = prompt('Reason for declining (optional):') || ''
+  try {
+    const r = await fetch(`/api/customer/${TOKEN}/cos/${_pendingCOId}/reject`,{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reason})
+    })
+    if(!r.ok) throw new Error()
+    const co = STATE.cos.find(c=>c.id===_pendingCOId)
+    if(co){ co.status='rejected'; co.rejection_reason=reason; co.rejected_at=new Date().toISOString() }
+    closeModal('sign-modal')
+    showToast('Change order declined')
+    render()
+  } catch(e){ showToast('⚠ Failed to decline. Please try again.') }
+}
+
+function closeModal(id){ document.getElementById(id).classList.remove('open') }
+
+document.querySelectorAll('.modal-overlay').forEach(overlay=>{
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) overlay.classList.remove('open') })
+})
+
+let _toastTimer=null
+function showToast(msg){
+  const t=document.getElementById('toast')
+  t.textContent=msg; t.classList.add('show')
+  clearTimeout(_toastTimer)
+  _toastTimer=setTimeout(()=>t.classList.remove('show'),3200)
+}
+
+document.addEventListener('DOMContentLoaded', load)
+</script>
+</body>
+</html>

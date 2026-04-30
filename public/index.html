@@ -846,95 +846,63 @@ const PHASES = [
 ];
 
 // ════════════════════════════════════════════════════════════
-//  DATA LAYER  (localStorage)
+//  API  (server-backed)
 // ════════════════════════════════════════════════════════════
-const DB = {
-  // ── Projects ──
-  getProjects(){ return JSON.parse(localStorage.getItem('sbc_projects')||'{}') },
-  saveProjects(d){ localStorage.setItem('sbc_projects',JSON.stringify(d)) },
-  getProject(id){ return this.getProjects()[id]||null },
-  createProject(data){
-    const projects = this.getProjects()
-    const id = 'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)
-    projects[id] = {...data, id, createdAt:Date.now(), tasks:{}, decisions:{}}
-    this.saveProjects(projects)
-    return id
+const API = {
+  async _json(url, opts){
+    const r = await fetch(url, opts)
+    if(!r.ok) throw new Error(`${r.status} ${r.statusText}`)
+    return r.json()
   },
-  updateProject(id,data){
-    const projects = this.getProjects()
-    if(projects[id]) projects[id] = {...projects[id],...data}
-    this.saveProjects(projects)
+  _post(url, body){
+    return this._json(url,{method:'POST',headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined})
   },
-  deleteProject(id){
-    const projects = this.getProjects()
-    delete projects[id]
-    this.saveProjects(projects)
-    localStorage.removeItem('sbc_co_'+id)
-    localStorage.removeItem('sbc_ph_'+id)
+  _put(url, body){
+    return this._json(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
   },
-  toggleTask(projectId,phaseId,taskIdx){
-    const projects = this.getProjects()
-    const p = projects[projectId]; if(!p) return
-    if(!p.tasks) p.tasks={}
-    const k=`${phaseId}_${taskIdx}`
-    p.tasks[k]=!p.tasks[k]
-    this.saveProjects(projects)
+  getProjects()              { return this._json('/api/projects') },
+  getProject(id)             { return this._json(`/api/projects/${id}`) },
+  createProject(data)        { return this._post('/api/projects', data) },
+  deleteProject(id)          { return this._json(`/api/projects/${id}`,{method:'DELETE'}) },
+  getBudget(id)              { return this._json(`/api/projects/${id}/budget`) },
+  updateBudgetItem(pid,bid,data){ return this._put(`/api/projects/${pid}/budget/${bid}`,data) },
+  getCOs(id)                 { return this._json(`/api/projects/${id}/cos`) },
+  addCO(id,data)             { return this._post(`/api/projects/${id}/cos`,data) },
+  signCO(pid,cid,signed_by)  { return this._post(`/api/projects/${pid}/cos/${cid}/sign`,{signed_by}) },
+  rejectCO(pid,cid,reason)   { return this._post(`/api/projects/${pid}/cos/${cid}/reject`,{reason}) },
+  getTaskStates(id)          { return this._json(`/api/projects/${id}/tasks`) },
+  setTaskState(id,key,done)  { return this._post(`/api/projects/${id}/tasks`,{task_key:key,done}) },
+  getDecisions(id)           { return this._json(`/api/projects/${id}/decisions`) },
+  setDecision(id,phase_id,dec_index,confirmed){ return this._post(`/api/projects/${id}/decisions`,{phase_id,dec_index,confirmed}) },
+  generateCustomerLink(id)   { return this._post(`/api/projects/${id}/customer-link`) },
+}
+
+// Photos stay in localStorage (binary data, PM-browser only)
+const Photos = {
+  get(pid)  { return JSON.parse(localStorage.getItem('sbc_ph_'+pid)||'{}') },
+  save(pid,d){ localStorage.setItem('sbc_ph_'+pid,JSON.stringify(d)) },
+  add(pid,phaseId,dataUrl,caption){
+    const p=this.get(pid); if(!p[phaseId]) p[phaseId]=[]
+    p[phaseId].push({id:'ph_'+Date.now(),dataUrl,caption,uploadedAt:Date.now()})
+    this.save(pid,p)
   },
-  toggleDecision(projectId,phaseId,decIdx){
-    const projects = this.getProjects()
-    const p = projects[projectId]; if(!p) return
-    if(!p.decisions) p.decisions={}
-    const k=`${phaseId}_${decIdx}`
-    p.decisions[k]=!p.decisions[k]
-    this.saveProjects(projects)
-  },
-  // ── Change Orders ──
-  getCOs(pid){ return JSON.parse(localStorage.getItem('sbc_co_'+pid)||'[]') },
-  saveCOs(pid,d){ localStorage.setItem('sbc_co_'+pid,JSON.stringify(d)) },
-  addCO(pid,data){
-    const cos=this.getCOs(pid)
-    const co={...data,id:'co_'+Date.now(),projectId:pid,requestedAt:Date.now(),status:'pending'}
-    cos.push(co); this.saveCOs(pid,cos); return co
-  },
-  signCO(pid,coId,name){
-    const cos=this.getCOs(pid)
-    const co=cos.find(c=>c.id===coId)
-    if(co){co.status='signed';co.signedAt=Date.now();co.signedBy=name}
-    this.saveCOs(pid,cos)
-  },
-  rejectCO(pid,coId,reason){
-    const cos=this.getCOs(pid)
-    const co=cos.find(c=>c.id===coId)
-    if(co){co.status='rejected';co.rejectedAt=Date.now();co.rejectionReason=reason||''}
-    this.saveCOs(pid,cos)
-  },
-  // ── Photos ──
-  getPhotos(pid){ return JSON.parse(localStorage.getItem('sbc_ph_'+pid)||'{}') },
-  savePhotos(pid,d){ localStorage.setItem('sbc_ph_'+pid,JSON.stringify(d)) },
-  addPhoto(pid,phaseId,dataUrl,caption){
-    const photos=this.getPhotos(pid)
-    if(!photos[phaseId]) photos[phaseId]=[]
-    photos[phaseId].push({id:'ph_'+Date.now(),dataUrl,caption,uploadedAt:Date.now()})
-    this.savePhotos(pid,photos)
-  },
-  deletePhoto(pid,phaseId,photoId){
-    const photos=this.getPhotos(pid)
-    if(photos[phaseId]) photos[phaseId]=photos[phaseId].filter(p=>p.id!==photoId)
-    this.savePhotos(pid,photos)
+  del(pid,phaseId,photoId){
+    const p=this.get(pid)
+    if(p[phaseId]) p[phaseId]=p[phaseId].filter(x=>x.id!==photoId)
+    this.save(pid,p)
   }
 }
 
 // ════════════════════════════════════════════════════════════
-//  ROUTER  (URL hash navigation)
+//  ROUTER
 // ════════════════════════════════════════════════════════════
-let STATE = {view:'dashboard', projectId:null, role:'pm', openPhases:new Set([1])}
-let _pendingCOProjectId=null, _pendingCOId=null, _pendingPhotoPhaseId=null, _pendingPhotoProjectId=null
+let STATE = {view:'dashboard',projectId:null,role:'pm',openPhases:new Set([1]),
+             _project:null,_cos:[],_budget:[],_tasks:{},_decisions:{}}
+let _pendingCOProjectId=null,_pendingCOId=null,_pendingPhotoPhaseId=null,_pendingPhotoProjectId=null
 
-function navigate(hash){
-  window.location.hash = hash
-}
+function navigate(hash){ window.location.hash = hash }
 
-function parseHash(){
+async function parseHash(){
   const h = (window.location.hash||'').replace(/^#/,'').trim()
   if(!h || h==='dashboard'){
     STATE.view='dashboard'; STATE.projectId=null; STATE.role='pm'
@@ -948,21 +916,21 @@ function parseHash(){
     STATE.view = 'project'
     if(STATE.projectId !== prevId) STATE.openPhases = new Set([1])
   }
-  renderApp()
+  await renderApp()
 }
 
-window.addEventListener('hashchange', parseHash)
+window.addEventListener('hashchange', ()=>parseHash().catch(console.error))
 
 // ════════════════════════════════════════════════════════════
 //  RENDER ENGINE
 // ════════════════════════════════════════════════════════════
-function renderApp(){
+async function renderApp(){
   const app = document.getElementById('app')
   if(STATE.view==='dashboard'){
-    app.innerHTML = renderDashboard()
+    const projects = await API.getProjects()
+    app.innerHTML = renderDashboard(projects)
   } else if(STATE.view==='new-project'){
     app.innerHTML = renderProjectForm()
-    // Set default dates
     const today = new Date()
     const el = document.getElementById('f-start')
     if(el && !el.value) el.value = today.toISOString().split('T')[0]
@@ -972,16 +940,31 @@ function renderApp(){
       endEl.value = end.toISOString().split('T')[0]
     }
   } else if(STATE.view==='project'){
-    const proj = DB.getProject(STATE.projectId)
-    if(!proj){ navigate(''); return }
-    app.innerHTML = renderProject(proj, STATE.role)
+    const [proj,cos,budget,tasks,decisions] = await Promise.all([
+      API.getProject(STATE.projectId),
+      API.getCOs(STATE.projectId),
+      API.getBudget(STATE.projectId),
+      API.getTaskStates(STATE.projectId),
+      API.getDecisions(STATE.projectId),
+    ])
+    if(!proj||proj.error){ navigate(''); return }
+    STATE._project=proj; STATE._cos=cos; STATE._budget=budget
+    STATE._tasks=tasks;  STATE._decisions=decisions
+    app.innerHTML = renderProject(proj,cos,budget,tasks,decisions,STATE.role)
   }
 }
 
+function _rerender(){
+  if(STATE._project)
+    document.getElementById('app').innerHTML =
+      renderProject(STATE._project,STATE._cos,STATE._budget,STATE._tasks,STATE._decisions,STATE.role)
+}
+
 // ── Dashboard ──
-function renderDashboard(){
-  const projects = DB.getProjects()
-  const list = Object.values(projects).sort((a,b)=>b.createdAt-a.createdAt)
+function renderDashboard(projects){
+  const list = projects.filter(p=>p.status!=='archived')
+  const totalTasks = PHASES.reduce((s,ph)=>s+ph.pm.tasks.length,0)
+
   const topbar = `<div class="topbar">
     <div class="tb-brand" onclick="navigate('')">
       <span class="tb-logo">Southern Bay Construction</span>
@@ -1002,27 +985,25 @@ function renderDashboard(){
     </div></div>`
   }
 
-  const totalTasks = PHASES.reduce((s,ph)=>s+ph.pm.tasks.length,0)
   const cards = list.map(proj=>{
-    const cos=DB.getCOs(proj.id)
-    const pending=cos.filter(c=>c.status==='pending').length
-    const signed=cos.filter(c=>c.status==='signed').length
-    const doneTasks=proj.tasks?Object.values(proj.tasks).filter(Boolean).length:0
-    const pct=Math.round(doneTasks/totalTasks*100)
-    const badges=[
+    const pending = Number(proj.cos_pending)||0
+    const signed  = Number(proj.cos_signed)||0
+    const done    = Number(proj.tasks_done)||0
+    const pct     = totalTasks ? Math.round(done/totalTasks*100) : 0
+    const badges  = [
       pending?`<span class="badge badge-pending">⚠ ${pending} pending CO${pending>1?'s':''}</span>`:'',
-      signed?`<span class="badge badge-signed">✓ ${signed} approved</span>`:''
+      signed ?`<span class="badge badge-signed">✓ ${signed} approved</span>`:''
     ].filter(Boolean).join('')
     return `<div class="proj-card" onclick="navigate('p/${proj.id}')">
       <div class="pc-name">${esc(proj.name)}</div>
       <div class="pc-meta">
-        <div class="pc-row"><span class="pc-icon">👤</span>${esc(proj.clientName)||'—'}</div>
+        <div class="pc-row"><span class="pc-icon">👤</span>${esc(proj.client_name)||'—'}</div>
         <div class="pc-row"><span class="pc-icon">📍</span>${esc(proj.address)||'—'}</div>
-        <div class="pc-row"><span class="pc-icon">🗓</span>${proj.contractDate||'—'} → ${proj.estCompletion||'—'}</div>
+        <div class="pc-row"><span class="pc-icon">🗓</span>${proj.contract_date||'—'} → ${proj.est_completion||'—'}</div>
         <div class="pc-row"><span class="pc-icon">👷</span>${esc(proj.pm)||'—'}</div>
       </div>
       <div class="pc-progress">
-        <div class="pc-prog-label"><span>Task Progress</span><span>${doneTasks}/${totalTasks} (${pct}%)</span></div>
+        <div class="pc-prog-label"><span>Task Progress</span><span>${done}/${totalTasks} (${pct}%)</span></div>
         <div class="pc-prog-bar"><div class="pc-prog-fill" style="width:${pct}%"></div></div>
       </div>
       ${badges?`<div class="pc-badges">${badges}</div>`:''}
@@ -1049,7 +1030,7 @@ function renderProjectForm(){
   </div>
   <div class="dashboard"><div class="form-wrap">
     <div class="form-h">New Construction Project</div>
-    <p class="form-sub">Enter the project details below. All 10 phases, task checklists, and cost references will be created automatically.</p>
+    <p class="form-sub">Enter the project details below. All 10 phases, task checklists, and cost estimates are created automatically and are editable per project.</p>
     <div class="form-grid">
       <div class="form-field form-full">
         <label class="form-label">Project Name *</label>
@@ -1084,24 +1065,20 @@ function renderProjectForm(){
 }
 
 // ── Project View ──
-function renderProject(proj, role){
+function renderProject(proj, cos, budget, tasks, decisions, role){
   const isPM = role==='pm'
-  const cos = DB.getCOs(proj.id)
-  const signedCOs = cos.filter(c=>c.status==='signed')
+  const signedCOs  = cos.filter(c=>c.status==='signed')
   const pendingCOs = cos.filter(c=>c.status==='pending')
 
-  const baseTotal = PHASES.reduce((sum,ph)=>{
-    return sum+(ph.pm.costs||[]).reduce((s,c)=>s+(c.amt||0),0)
-  },0)
-  const signedTotal = signedCOs.reduce((s,co)=>s+(parseFloat(co.amount)||0),0)
+  const baseTotal    = budget.reduce((s,b)=>s+(b.amt||0),0)
+  const signedTotal  = signedCOs.reduce((s,co)=>s+(parseFloat(co.amount)||0),0)
   const pendingTotal = pendingCOs.reduce((s,co)=>s+(parseFloat(co.amount)||0),0)
   const approvedTotal = baseTotal+signedTotal
 
   const totalTasks = PHASES.reduce((s,ph)=>s+ph.pm.tasks.length,0)
-  const doneTasks = proj.tasks?Object.values(proj.tasks).filter(Boolean).length:0
+  const doneTasks  = Object.values(tasks).filter(Boolean).length
   const pct = Math.round(doneTasks/totalTasks*100)
 
-  // Topbar
   const topbar = isPM
     ? `<div class="topbar">
         <div class="tb-brand" onclick="navigate('')">
@@ -1136,50 +1113,35 @@ function renderProject(proj, role){
   </div>`
 
   const meta = `<div class="proj-meta">
-    <div class="pm-field"><span class="pm-label">Client</span><span class="pm-val">${esc(proj.clientName)||'—'}</span></div>
+    <div class="pm-field"><span class="pm-label">Client</span><span class="pm-val">${esc(proj.client_name)||'—'}</span></div>
     <div class="pm-field"><span class="pm-label">Address</span><span class="pm-val">${esc(proj.address)||'—'}</span></div>
-    <div class="pm-field"><span class="pm-label">Contract</span><span class="pm-val">${proj.contractDate||'—'}</span></div>
-    <div class="pm-field"><span class="pm-label">Est. Complete</span><span class="pm-val">${proj.estCompletion||'—'}</span></div>
+    <div class="pm-field"><span class="pm-label">Contract</span><span class="pm-val">${proj.contract_date||'—'}</span></div>
+    <div class="pm-field"><span class="pm-label">Est. Complete</span><span class="pm-val">${proj.est_completion||'—'}</span></div>
     <div class="pm-field"><span class="pm-label">PM</span><span class="pm-val">${esc(proj.pm)||'—'}</span></div>
     <span class="role-badge ${isPM?'role-pm':'role-cu'}">${isPM?'⚙ PM View':'👤 Customer View'}</span>
   </div>`
 
-  // Progress bar
   const progressBar = `<div class="overall-progress">
     <span class="op-label">Task Progress</span>
     <div class="op-bar-wrap"><div class="op-bar-fill" style="width:${pct}%"></div></div>
     <span class="op-count">${doneTasks} / ${totalTasks} tasks · ${pct}%</span>
   </div>`
 
-  // Budget panel
-  const budget = `<div class="budget-panel">
+  const budgetPanel = isPM ? `<div class="budget-panel">
     <div class="bp-header">
       <span class="bp-title">Budget Overview</span>
+      <span style="font-size:10px;color:#4A6A7A;font-family:'IBM Plex Mono',monospace">CLICK AMOUNTS IN COST TABLES TO EDIT</span>
     </div>
     <div class="bp-grid">
-      <div class="bp-stat">
-        <div class="bp-num">${fmt(baseTotal)}</div>
-        <div class="bp-lbl">base estimate</div>
-      </div>
-      <div class="bp-stat">
-        <div class="bp-num ${signedTotal>0?'green':''}">${signedTotal>0?'+'+fmt(signedTotal):'$0'}</div>
-        <div class="bp-lbl">approved change orders</div>
-      </div>
-      <div class="bp-stat">
-        <div class="bp-num ${pendingTotal>0?'amber':''}">${pendingTotal>0?'+'+fmt(pendingTotal):'$0'}</div>
-        <div class="bp-lbl">pending approval</div>
-      </div>
-      <div class="bp-stat">
-        <div class="bp-num ${signedTotal>0?'green':''}">${fmt(approvedTotal)}</div>
-        <div class="bp-lbl">approved total</div>
-      </div>
+      <div class="bp-stat"><div class="bp-num">${fmt(baseTotal)}</div><div class="bp-lbl">base estimate</div></div>
+      <div class="bp-stat"><div class="bp-num ${signedTotal>0?'green':''}">${signedTotal>0?'+'+fmt(signedTotal):'$0'}</div><div class="bp-lbl">approved change orders</div></div>
+      <div class="bp-stat"><div class="bp-num ${pendingTotal>0?'amber':''}">${pendingTotal>0?'+'+fmt(pendingTotal):'$0'}</div><div class="bp-lbl">pending approval</div></div>
+      <div class="bp-stat"><div class="bp-num ${signedTotal>0?'green':''}">${fmt(approvedTotal)}</div><div class="bp-lbl">approved total</div></div>
     </div>
-  </div>`
+  </div>` : ''
 
-  // Change orders panel
   const coPanel = renderCOPanel(proj.id, cos, role)
 
-  // Customer welcome block
   const cuWelcome = !isPM ? `<div class="cu-welcome">
     <div class="cu-welcome-inner">
       <div class="cu-welcome-label">Your Project Portal</div>
@@ -1199,7 +1161,7 @@ function renderProject(proj, role){
   </div>` : ''
 
   const phasesHtml = `<div class="phases">
-    ${PHASES.map(ph=>renderPhase(ph,proj,role)).join('')}
+    ${PHASES.map(ph=>renderPhase(ph,proj,role,budget,tasks,decisions,cos)).join('')}
   </div>`
 
   const summary = isPM ? `<div class="summary">
@@ -1207,10 +1169,10 @@ function renderProject(proj, role){
     <div class="ss"><div class="sn">20–26</div><div class="sl">est. weeks</div></div>
     <div class="ss"><div class="sn">3</div><div class="sl">payment milestones</div></div>
     <div class="ss"><div class="sn">${fmt(approvedTotal)}</div><div class="sl">approved total</div></div>
-    <div class="sf2">Edwards Home reference: $393,295 base · 12% contractor fee ($47,195) · Adjust line items per project</div>
+    <div class="sf2">Edwards Home reference: $393,295 base · 12% contractor fee ($47,195) · Line items are editable per project</div>
   </div>` : ''
 
-  return topbar+breadcrumb+meta+progressBar+cuWelcome+budget+coPanel+legend+phasesHtml+summary
+  return topbar+breadcrumb+meta+progressBar+cuWelcome+budgetPanel+coPanel+legend+phasesHtml+summary
 }
 
 // ── Change Orders Panel ──
@@ -1221,8 +1183,8 @@ function renderCOPanel(pid, cos, role){
   const items = !cos.length
     ? `<div class="co-empty">${isPM?'No change orders yet. Use "+ Change Order" to document scope changes for customer approval.':'No change orders at this time.'}</div>`
     : cos.map(co=>{
-        const ph = PHASES.find(p=>p.id===parseInt(co.phase))
-        const phName = ph?ph.name:`Phase ${co.phase}`
+        const ph = PHASES.find(p=>p.id===parseInt(co.phase_id))
+        const phName = ph?ph.name:`Phase ${co.phase_id}`
         const pill = {
           pending:`<span class="co-status-pill csp-pending">Pending Approval</span>`,
           signed: `<span class="co-status-pill csp-signed">Approved</span>`,
@@ -1231,9 +1193,9 @@ function renderCOPanel(pid, cos, role){
         const signBtn = (co.status==='pending'&&!isPM)
           ? `<button class="btn btn-primary btn-sm" onclick="openSignModal('${pid}','${co.id}')">Review &amp; Sign</button>` : ''
         const footer = co.status==='signed'
-          ? `<div class="co-sig-line">✓ Signed by ${esc(co.signedBy)} · ${fmtDate(co.signedAt)}</div>`
+          ? `<div class="co-sig-line">✓ Signed by ${esc(co.signed_by)} · ${fmtDate(co.signed_at)}</div>`
           : co.status==='rejected'
-          ? `<div class="co-rej-line">✕ Declined ${fmtDate(co.rejectedAt)}${co.rejectionReason?' — "'+esc(co.rejectionReason)+'"':''}</div>`
+          ? `<div class="co-rej-line">✕ Declined ${fmtDate(co.rejected_at)}${co.rejection_reason?' — "'+esc(co.rejection_reason)+'"':''}</div>`
           : ''
         return `<div class="co-item ${co.status}">
           <div>${pill}</div>
@@ -1242,8 +1204,8 @@ function renderCOPanel(pid, cos, role){
             ${co.description?`<div class="co-desc">${esc(co.description)}</div>`:''}
             <div class="co-meta-row">
               <span class="co-amount">${co.amount&&parseFloat(co.amount)>0?'+'+fmt(parseFloat(co.amount)):'No cost change'}</span>
-              <span class="co-meta-txt">Phase ${co.phase}: ${phName}</span>
-              <span class="co-meta-txt">Requested ${fmtDate(co.requestedAt)}</span>
+              <span class="co-meta-txt">Phase ${co.phase_id}: ${phName}</span>
+              <span class="co-meta-txt">Requested ${fmtDate(co.requested_at)}</span>
               ${signBtn}
             </div>
             ${footer}
@@ -1264,11 +1226,12 @@ function renderCOPanel(pid, cos, role){
 }
 
 // ── Phase Card ──
-function renderPhase(ph, proj, role){
+function renderPhase(ph, proj, role, budget, tasks, decisions, allCos){
   const isPM = role==='pm'
   const isOpen = STATE.openPhases && STATE.openPhases.has(ph.id)
-  const cos = DB.getCOs(proj.id).filter(co=>parseInt(co.phase)===ph.id)
-  const phasePhotos = (DB.getPhotos(proj.id)[ph.id]||[])
+  const cos = allCos.filter(co=>parseInt(co.phase_id)===ph.id)
+  const phaseBudget = budget.filter(b=>b.phase_id===ph.id)
+  const phasePhotos = (Photos.get(proj.id)[ph.id]||[])
   const pendingCOs = cos.filter(c=>c.status==='pending').length
 
   const flags = ph.flags.map(f=>({
@@ -1307,14 +1270,13 @@ function renderPhase(ph, proj, role){
     </div>
   </div>`
 
-  // Decisions: PM sees plain list, customer gets interactive checkboxes
   const decHtml = ph.cu.decisions.length ? `<div class="blk">
     <div class="blab cu">${isPM?'Decisions needed from client':'Decisions needed from you'}</div>
     <div class="decs">
       ${ph.cu.decisions.map((d,i)=>{
         if(isPM) return `<div class="dec"><span class="da">›</span><span>${esc(d)}</span></div>`
         const k=`${ph.id}_${i}`
-        const done = proj.decisions&&proj.decisions[k]
+        const done = decisions&&decisions[k]
         return `<div class="dec-item${done?' confirmed':''}" onclick="toggleDecision('${proj.id}',${ph.id},${i})">
           <div class="dec-cb">${done?'✓':''}</div>
           <span class="dec-text">${esc(d)}</span>
@@ -1332,7 +1294,6 @@ function renderPhase(ph, proj, role){
     ? `<div class="blk"><div class="pay">💰 ${esc(ph.cu.pay)}</div></div>`
     : ''
 
-  // Phase-level COs (summary, customer view)
   const phaseCOHtml = (cos.length && !isPM) ? `<div class="blk">
     <div class="blab cu">Change Orders — This Phase</div>
     ${cos.map(co=>{
@@ -1372,7 +1333,7 @@ function renderPhase(ph, proj, role){
   // PM column
   const tasksHtml = ph.pm.tasks.map((t,i)=>{
     const k=`${ph.id}_${i}`
-    const done = proj.tasks&&proj.tasks[k]
+    const done = tasks&&tasks[k]
     const cls=['task',t.fl==='trig'?'trig':t.fl==='insp'?'insp':'',done?'done':''].filter(Boolean).join(' ')
     const badge = t.b?`<span class="tbadge ${t.fl==='trig'?'tb-t':t.fl==='insp'?'tb-i':''}">${t.b}</span>`:''
     return `<div class="${cls}" onclick="toggleTask('${proj.id}',${ph.id},${i})">
@@ -1381,14 +1342,26 @@ function renderPhase(ph, proj, role){
     </div>`
   }).join('')
 
-  const costsHtml = ph.pm.costs&&ph.pm.costs.length?`<div class="blk">
-    <div class="blab pm">Cost reference (Edwards Home)</div>
+  const costsHtml = phaseBudget.length?`<div class="blk">
+    <div class="blab pm" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>Cost reference (per-project)</span>
+      <span style="font-size:9px;color:#4A8AAA;font-family:'IBM Plex Mono',monospace;font-weight:400">✎ CLICK TO EDIT</span>
+    </div>
     <table class="ctable">
-      <tr><th>Line Item</th><th>Amount</th></tr>
-      ${ph.pm.costs.map(c=>`<tr>
-        <td>${esc(c.item)}${c.note?`<br><span class="cref">${esc(c.note)}</span>`:''}</td>
-        <td>${c.amt?fmt(c.amt):'<span style="color:#B88">— quote</span>'}</td>
-      </tr>`).join('')}
+      <tr><th>Line Item</th><th style="text-align:right">Amount</th></tr>
+      ${phaseBudget.map(b=>{
+        const display = b.amt!==null&&b.amt!==undefined ? fmt(b.amt) : '<span style="color:#B88">— quote</span>'
+        return `<tr>
+          <td>${esc(b.item)}${b.note?`<br><span class="cref">${esc(b.note)}</span>`:''}</td>
+          <td class="budget-amt-cell" onclick="startBudgetEdit(this)"
+              data-item-id="${b.id}" data-project-id="${proj.id}"
+              data-amt="${b.amt!==null&&b.amt!==undefined?b.amt:''}"
+              data-note="${escAttr(b.note||'')}"
+              style="cursor:pointer;user-select:none;" title="Click to edit amount">
+            ${display}&nbsp;<span style="font-size:9px;color:#4A8AAA;opacity:.6">✎</span>
+          </td>
+        </tr>`
+      }).join('')}
     </table>
   </div>`:''
 
@@ -1413,34 +1386,85 @@ function renderPhase(ph, proj, role){
 //  ACTIONS
 // ════════════════════════════════════════════════════════════
 
-function createProject(){
+async function createProject(){
   const name = document.getElementById('f-name').value.trim()
   if(!name){ showToast('⚠ Project name is required'); return }
-  const id = DB.createProject({
-    name,
-    clientName: document.getElementById('f-client').value.trim(),
-    address:    document.getElementById('f-address').value.trim(),
-    contractDate: document.getElementById('f-start').value,
-    estCompletion: document.getElementById('f-end').value,
-    pm: document.getElementById('f-pm').value.trim()
-  })
-  navigate('p/'+id)
+  const budget_items = []
+  for(const ph of PHASES){
+    for(const c of (ph.pm.costs||[])){
+      budget_items.push({phase_id:ph.id, item:c.item, amt:c.amt??null, note:c.note||''})
+    }
+  }
+  try {
+    const result = await API.createProject({
+      name,
+      client_name:    document.getElementById('f-client').value.trim(),
+      address:        document.getElementById('f-address').value.trim(),
+      contract_date:  document.getElementById('f-start').value,
+      est_completion: document.getElementById('f-end').value,
+      pm:             document.getElementById('f-pm').value.trim(),
+      budget_items,
+    })
+    navigate('p/'+result.id)
+  } catch(e){ showToast('⚠ Failed to create project') }
 }
 
 function togglePhase(id){
   if(!STATE.openPhases) STATE.openPhases = new Set()
   STATE.openPhases.has(id) ? STATE.openPhases.delete(id) : STATE.openPhases.add(id)
-  renderApp()
+  if(STATE._project)
+    document.getElementById('app').innerHTML =
+      renderProject(STATE._project,STATE._cos,STATE._budget,STATE._tasks,STATE._decisions,STATE.role)
 }
 
-function toggleTask(pid, phaseId, taskIdx){
-  DB.toggleTask(pid, phaseId, taskIdx)
-  renderApp()
+async function toggleTask(pid, phaseId, taskIdx){
+  const k=`${phaseId}_${taskIdx}`
+  const was = STATE._tasks&&STATE._tasks[k]
+  if(STATE._tasks) STATE._tasks[k]=!was
+  if(STATE._project) document.getElementById('app').innerHTML =
+    renderProject(STATE._project,STATE._cos,STATE._budget,STATE._tasks,STATE._decisions,STATE.role)
+  try { await API.setTaskState(pid,k,!was) }
+  catch(e){ if(STATE._tasks) STATE._tasks[k]=was; showToast('⚠ Failed to save'); if(STATE._project) document.getElementById('app').innerHTML=renderProject(STATE._project,STATE._cos,STATE._budget,STATE._tasks,STATE._decisions,STATE.role) }
 }
 
-function toggleDecision(pid, phaseId, decIdx){
-  DB.toggleDecision(pid, phaseId, decIdx)
-  renderApp()
+async function toggleDecision(pid, phaseId, decIdx){
+  const k=`${phaseId}_${decIdx}`
+  const was = STATE._decisions&&STATE._decisions[k]
+  if(STATE._decisions) STATE._decisions[k]=!was
+  if(STATE._project) document.getElementById('app').innerHTML =
+    renderProject(STATE._project,STATE._cos,STATE._budget,STATE._tasks,STATE._decisions,STATE.role)
+  try { await API.setDecision(pid,phaseId,decIdx,!was) }
+  catch(e){ if(STATE._decisions) STATE._decisions[k]=was; showToast('⚠ Failed to save') }
+}
+
+// ── Budget inline edit ──
+function startBudgetEdit(td){
+  if(td.querySelector('input')) return
+  const itemId    = td.dataset.itemId
+  const projectId = td.dataset.projectId
+  const currentAmt  = td.dataset.amt
+  const currentNote = td.dataset.note
+
+  const input = document.createElement('input')
+  input.type='number'; input.step='0.01'; input.min='0'; input.value=currentAmt
+  input.style.cssText='width:100px;font-family:inherit;font-size:11px;text-align:right;padding:3px 6px;border:1.5px solid #4A8AAA;border-radius:3px;background:#fff;outline:none;'
+
+  let committed=false
+  async function commit(){
+    if(committed) return; committed=true
+    const amt = input.value.trim()==='' ? null : parseFloat(input.value)
+    if(STATE._budget){ const it=STATE._budget.find(b=>String(b.id)===String(itemId)); if(it) it.amt=amt }
+    try { await API.updateBudgetItem(projectId,itemId,{amt,note:currentNote}) }
+    catch(e){ showToast('⚠ Failed to save budget item') }
+    await renderApp()
+  }
+
+  td.innerHTML=''; td.appendChild(input); input.focus(); input.select()
+  input.addEventListener('blur', commit)
+  input.addEventListener('keydown', e=>{
+    if(e.key==='Enter'){ e.preventDefault(); input.blur() }
+    if(e.key==='Escape'){ committed=true; renderApp() }
+  })
 }
 
 // ── Change Orders ──
@@ -1454,119 +1478,126 @@ function openCOModal(pid){
   openModal('co-modal')
 }
 
-function submitCO(){
+async function submitCO(){
   const title = document.getElementById('co-title').value.trim()
   if(!title){ showToast('⚠ Change order title is required'); return }
-  DB.addCO(_pendingCOProjectId,{
-    phase:  document.getElementById('co-phase').value,
-    title,
-    description: document.getElementById('co-desc').value.trim(),
-    amount: document.getElementById('co-amount').value
-  })
-  closeModal('co-modal')
-  showToast('Change order added — customer will see it in their portal')
-  renderApp()
+  try {
+    await API.addCO(_pendingCOProjectId,{
+      phase_id:    document.getElementById('co-phase').value,
+      title,
+      description: document.getElementById('co-desc').value.trim(),
+      amount:      document.getElementById('co-amount').value,
+    })
+    closeModal('co-modal')
+    showToast('Change order added — customer will see it in their portal')
+    await renderApp()
+  } catch(e){ showToast('⚠ Failed to add change order') }
 }
 
 function openSignModal(pid, coId){
   _pendingCOProjectId = pid
   _pendingCOId = coId
-  const cos = DB.getCOs(pid)
-  const co = cos.find(c=>c.id===coId); if(!co) return
-  const ph = PHASES.find(p=>p.id===parseInt(co.phase))
+  const co = STATE._cos&&STATE._cos.find(c=>c.id===coId); if(!co) return
+  const ph = PHASES.find(p=>p.id===parseInt(co.phase_id))
   document.getElementById('sign-modal-title').textContent = co.title
   document.getElementById('sign-modal-detail').innerHTML = `
     <div class="co-review-box">
       <div class="co-review-title">${esc(co.title)}</div>
       ${co.description?`<div class="co-review-row"><span>Description</span><span class="co-review-val">${esc(co.description)}</span></div>`:''}
-      <div class="co-review-row"><span>Phase</span><span class="co-review-val">${ph?ph.name:'Phase '+co.phase}</span></div>
-      <div class="co-review-row"><span>Requested</span><span class="co-review-val">${fmtDate(co.requestedAt)}</span></div>
+      <div class="co-review-row"><span>Phase</span><span class="co-review-val">${ph?ph.name:'Phase '+co.phase_id}</span></div>
+      <div class="co-review-row"><span>Requested</span><span class="co-review-val">${fmtDate(co.requested_at)}</span></div>
       <div class="co-amount-display">${co.amount&&parseFloat(co.amount)>0?'+'+fmt(parseFloat(co.amount)):'No additional cost'}</div>
     </div>`
   document.getElementById('sign-name').value = ''
   openModal('sign-modal')
 }
 
-function signCO(){
+async function signCO(){
   const name = document.getElementById('sign-name').value.trim()
   if(!name){ showToast('⚠ Please enter your full name to sign'); return }
-  DB.signCO(_pendingCOProjectId, _pendingCOId, name)
-  closeModal('sign-modal')
-  showToast('✓ Change order approved and signed')
-  renderApp()
+  try {
+    await API.signCO(_pendingCOProjectId,_pendingCOId,name)
+    closeModal('sign-modal')
+    showToast('✓ Change order approved and signed')
+    await renderApp()
+  } catch(e){ showToast('⚠ Failed to sign') }
 }
 
-function rejectCO(){
+async function rejectCO(){
   const reason = prompt('Reason for declining (optional):') || ''
-  DB.rejectCO(_pendingCOProjectId, _pendingCOId, reason)
-  closeModal('sign-modal')
-  showToast('Change order declined')
-  renderApp()
+  try {
+    await API.rejectCO(_pendingCOProjectId,_pendingCOId,reason)
+    closeModal('sign-modal')
+    showToast('Change order declined')
+    await renderApp()
+  } catch(e){ showToast('⚠ Failed to decline') }
 }
 
-// ── Photos ──
+// ── Customer Link ──
+async function copyCustomerLink(pid){
+  try {
+    const {url} = await API.generateCustomerLink(pid)
+    const full = `${location.origin}${url}`
+    navigator.clipboard.writeText(full)
+      .then(()=>showToast('✓ Secure customer link copied'))
+      .catch(()=>prompt('Copy this secure link for your client:',full))
+  } catch(e){ showToast('⚠ Failed to generate customer link') }
+}
+
+// ── Photos (localStorage) ──
 function openPhotoModal(pid, phaseId){
-  _pendingPhotoProjectId = pid
-  _pendingPhotoPhaseId = phaseId
-  const ph = PHASES.find(p=>p.id===phaseId)
-  document.getElementById('photo-modal-title').textContent = `Add Photo — Phase ${phaseId}`
-  document.getElementById('photo-modal-sub').textContent = ph
-    ? `Attach a photo to "${ph.name}". Images are resized to max 800px automatically.`
-    : 'Select a photo to attach.'
-  document.getElementById('photo-file').value = ''
-  document.getElementById('photo-caption').value = ''
+  _pendingPhotoProjectId=pid; _pendingPhotoPhaseId=phaseId
+  const ph=PHASES.find(p=>p.id===phaseId)
+  document.getElementById('photo-modal-title').textContent=`Add Photo — Phase ${phaseId}`
+  document.getElementById('photo-modal-sub').textContent=ph
+    ?`Attach a photo to "${ph.name}". Images are resized to max 800px automatically.`:'Select a photo to attach.'
+  document.getElementById('photo-file').value=''
+  document.getElementById('photo-caption').value=''
   openModal('photo-modal')
 }
 
 function submitPhoto(){
-  const file = document.getElementById('photo-file').files[0]
+  const file=document.getElementById('photo-file').files[0]
   if(!file){ showToast('⚠ Please select a photo'); return }
-  const caption = document.getElementById('photo-caption').value.trim()
-  const reader = new FileReader()
-  reader.onload = e => {
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.createElement('canvas')
-      const MAX = 800
-      let w=img.width, h=img.height
+  const caption=document.getElementById('photo-caption').value.trim()
+  const reader=new FileReader()
+  reader.onload=e=>{
+    const img=new Image()
+    img.onload=()=>{
+      const canvas=document.createElement('canvas')
+      const MAX=800; let w=img.width,h=img.height
       if(w>MAX){ h=Math.round(h*MAX/w); w=MAX }
       canvas.width=w; canvas.height=h
       canvas.getContext('2d').drawImage(img,0,0,w,h)
-      const dataUrl = canvas.toDataURL('image/jpeg',0.82)
+      const dataUrl=canvas.toDataURL('image/jpeg',0.82)
       try {
-        DB.addPhoto(_pendingPhotoProjectId, _pendingPhotoPhaseId, dataUrl, caption)
+        Photos.add(_pendingPhotoProjectId,_pendingPhotoPhaseId,dataUrl,caption)
         closeModal('photo-modal')
         showToast('✓ Photo added to phase')
-        renderApp()
-        // scroll to phase
-        setTimeout(()=>{ document.getElementById('ph-'+_pendingPhotoPhaseId)?.scrollIntoView({behavior:'smooth',block:'nearest'}) },100)
+        if(STATE._project) document.getElementById('app').innerHTML=
+          renderProject(STATE._project,STATE._cos,STATE._budget,STATE._tasks,STATE._decisions,STATE.role)
+        setTimeout(()=>document.getElementById('ph-'+_pendingPhotoPhaseId)?.scrollIntoView({behavior:'smooth',block:'nearest'}),100)
       } catch(err){
-        alert('Storage limit reached. Try deleting older photos or using smaller images.\n\nTip: Consider hosting photos externally (Google Drive, Dropbox) and adding links in the caption.')
+        alert('Storage limit reached. Try deleting older photos or using smaller images.')
       }
     }
-    img.src = e.target.result
+    img.src=e.target.result
   }
   reader.readAsDataURL(file)
 }
 
-function deletePhotoEvt(e, pid, phaseId, photoId){
+function deletePhotoEvt(e,pid,phaseId,photoId){
   e.stopPropagation()
   if(!confirm('Delete this photo?')) return
-  DB.deletePhoto(pid, phaseId, photoId)
+  Photos.del(pid,phaseId,photoId)
   showToast('Photo deleted')
-  renderApp()
+  if(STATE._project) document.getElementById('app').innerHTML=
+    renderProject(STATE._project,STATE._cos,STATE._budget,STATE._tasks,STATE._decisions,STATE.role)
 }
 
 function viewPhoto(url){
-  document.getElementById('lightbox-img').src = url
+  document.getElementById('lightbox-img').src=url
   openModal('lightbox')
-}
-
-function copyCustomerLink(pid){
-  const url = `${location.origin}${location.pathname}#p/${pid}/c`
-  navigator.clipboard.writeText(url)
-    .then(()=>showToast('✓ Customer link copied to clipboard'))
-    .catch(()=>prompt('Copy this link to share with your client:',url))
 }
 
 // ── Modal helpers ──
@@ -1589,12 +1620,17 @@ function showToast(msg){
 
 // ── Utils ──
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
-function fmtDate(ts){ return ts?new Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—' }
+function escAttr(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;') }
+function fmtDate(val){
+  if(!val) return '—'
+  const d = new Date(typeof val==='number' ? val : String(val).replace(' ','T')+'Z')
+  return isNaN(d)?'—':d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+}
 
 // ════════════════════════════════════════════════════════════
 //  INIT
 // ════════════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', parseHash)
+document.addEventListener('DOMContentLoaded', ()=>parseHash().catch(console.error))
 </script>
 </body>
 </html>
