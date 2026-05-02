@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const db = require('./db');
+const scheduler = require('./scheduler');
 
 const app = express();
 app.use(express.json());
@@ -195,6 +196,17 @@ app.post('/api/customer/:token/decisions', async (req, res) => {
   }
 });
 
+// ── ADMIN: MANUAL EMAIL TRIGGER ───────────────────────────────────
+
+app.post('/api/admin/send-updates', async (req, res) => {
+  try {
+    await scheduler.runWeeklyEmails();
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ── CATCH-ALL ─────────────────────────────────────────────────────
 
 app.get('*', (req, res) => {
@@ -204,6 +216,7 @@ app.get('*', (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 db.init().then(() => {
+  scheduler.start();
   app.listen(PORT, () => {
     console.log(`\n  Southern Bay Construction`);
     console.log(`  Running at http://localhost:${PORT}\n`);

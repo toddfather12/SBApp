@@ -82,6 +82,7 @@ async function init() {
   for (const sql of [
     `ALTER TABLE projects ADD COLUMN project_type TEXT DEFAULT 'new_construction'`,
     `ALTER TABLE projects ADD COLUMN work_scope TEXT DEFAULT ''`,
+    `ALTER TABLE projects ADD COLUMN client_email TEXT DEFAULT ''`,
   ]) {
     try { await client.execute(sql) } catch (_) {}
   }
@@ -113,18 +114,18 @@ module.exports = {
     return r.rows[0] ?? null;
   },
 
-  async createProject({ name, client_name, address, contract_date, est_completion, pm, project_type, work_scope }) {
+  async createProject({ name, client_name, address, contract_date, est_completion, pm, project_type, work_scope, client_email }) {
     const r = await client.execute({
-      sql: `INSERT INTO projects (name, client_name, address, contract_date, est_completion, pm, project_type, work_scope)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      sql: `INSERT INTO projects (name, client_name, address, contract_date, est_completion, pm, project_type, work_scope, client_email)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [name, client_name || '', address || '', contract_date || '', est_completion || '', pm || '',
-             project_type || 'new_construction', work_scope || ''],
+             project_type || 'new_construction', work_scope || '', client_email || ''],
     });
     return Number(r.lastInsertRowid);
   },
 
   async updateProject(id, fields) {
-    const allowed = ['name', 'client_name', 'address', 'contract_date', 'est_completion', 'pm', 'status', 'project_type', 'work_scope'];
+    const allowed = ['name', 'client_name', 'address', 'contract_date', 'est_completion', 'pm', 'status', 'project_type', 'work_scope', 'client_email'];
     const keys = Object.keys(fields).filter(k => allowed.includes(k));
     if (!keys.length) return;
     await client.execute({
@@ -301,5 +302,24 @@ module.exports = {
     const row = r.rows[0];
     if (!row) throw new Error('Invalid token');
     await this.setDecision(row.project_id, phaseId, decIndex, confirmed);
+  },
+
+  // ── WEEKLY MAILER ─────────────────────────────────────────────
+  async getProjectsForWeeklyEmail() {
+    const r = await client.execute(`
+      SELECT p.*,
+        COUNT(CASE WHEN ts.done = 1 THEN 1 END) AS tasks_done,
+        COUNT(ts.id) AS tasks_total,
+        ct.token
+      FROM projects p
+      LEFT JOIN task_states ts ON ts.project_id = p.id
+      LEFT JOIN customer_tokens ct ON ct.project_id = p.id
+      WHERE p.status != 'archived'
+        AND p.client_email != ''
+        AND p.client_email IS NOT NULL
+      GROUP BY p.id
+      ORDER BY p.name ASC
+    `);
+    return r.rows;
   },
 };

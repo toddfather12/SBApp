@@ -551,6 +551,48 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);m
   </div>
 </div>
 
+<!-- EDIT PROJECT INFO MODAL -->
+<div class="modal-overlay" id="edit-info-modal">
+  <div class="modal" style="max-width:520px;width:100%">
+    <h3>Edit Project Info</h3>
+    <p class="modal-sub">Update project details. Client email is used for weekly automated updates.</p>
+    <div class="modal-body">
+      <div class="form-field">
+        <label class="form-label">Project Name *</label>
+        <input class="form-input" id="ei-name">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Client Name</label>
+        <input class="form-input" id="ei-client">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Client Email <span style="color:#888;font-weight:400">(weekly updates)</span></label>
+        <input class="form-input" id="ei-client-email" type="email" placeholder="client@email.com">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Property Address</label>
+        <input class="form-input" id="ei-address">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Contract Date</label>
+        <input class="form-input" id="ei-start" type="date">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Est. Completion</label>
+        <input class="form-input" id="ei-end" type="date">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Project Manager</label>
+        <input class="form-input" id="ei-pm">
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal('edit-info-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProjectInfo()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
 <!-- PHOTO LIGHTBOX -->
 <div class="modal-overlay" id="lightbox" onclick="closeModal('lightbox')">
   <img id="lightbox-img" src="" alt="" style="max-width:90vw;max-height:90vh;border-radius:8px;object-fit:contain">
@@ -1384,6 +1426,7 @@ const API = {
   getProjects()              { return this._json('/api/projects') },
   getProject(id)             { return this._json(`/api/projects/${id}`) },
   createProject(data)        { return this._post('/api/projects', data) },
+  updateProject(id, data)    { return this._put(`/api/projects/${id}`, data) },
   deleteProject(id)          { return this._json(`/api/projects/${id}`,{method:'DELETE'}) },
   getBudget(id)              { return this._json(`/api/projects/${id}/budget`) },
   updateBudgetItem(pid,bid,data){ return this._put(`/api/projects/${pid}/budget/${bid}`,data) },
@@ -1678,6 +1721,10 @@ function renderProjectForm(){
         <label class="form-label">Project Manager</label>
         <input class="form-input" id="f-pm" value="David / Jacob">
       </div>
+      <div class="form-field form-full">
+        <label class="form-label">Client Email <span style="color:#888;font-weight:400">(for weekly updates)</span></label>
+        <input class="form-input" id="f-client-email" type="email" placeholder="client@email.com">
+      </div>
     </div>
     <div class="form-actions">
       <button class="btn btn-outline" onclick="_wizardBack()">← Back</button>
@@ -1716,6 +1763,7 @@ function renderProject(proj, cos, budget, tasks, decisions, role){
             <button class="vtab" onclick="navigate('p/${proj.id}/c')">Customer View</button>
             <button class="vtab on">PM View</button>
           </div>
+          <button class="btn btn-outline btn-sm" onclick="openEditInfoModal()">✏ Edit Info</button>
           <button class="btn btn-green btn-sm" onclick="copyCustomerLink('${proj.id}')">🔗 Share Link</button>
           <button class="btn btn-primary btn-sm" onclick="openCOModal('${proj.id}')">+ Change Order</button>
         </div>
@@ -1743,6 +1791,7 @@ function renderProject(proj, cos, budget, tasks, decisions, role){
     <div class="pm-field"><span class="pm-label">Contract</span><span class="pm-val">${proj.contract_date||'—'}</span></div>
     <div class="pm-field"><span class="pm-label">Est. Complete</span><span class="pm-val">${proj.est_completion||'—'}</span></div>
     <div class="pm-field"><span class="pm-label">PM</span><span class="pm-val">${esc(proj.pm)||'—'}</span></div>
+    ${isPM?`<div class="pm-field"><span class="pm-label">Client Email</span><span class="pm-val" style="color:${proj.client_email?'inherit':'#aaa'}">${esc(proj.client_email)||'not set'}</span></div>`:''}
     <span class="role-badge ${isPM?'role-pm':'role-cu'}">${isPM?'⚙ PM View':'👤 Customer View'}</span>
   </div>`
 
@@ -2104,6 +2153,7 @@ async function createProject(){
       pm:             document.getElementById('f-pm').value.trim(),
       project_type:   _wizard.type || 'new_construction',
       work_scope,
+      client_email:   document.getElementById('f-client-email').value.trim(),
       budget_items,
     })
     navigate('p/'+result.id)
@@ -2304,6 +2354,43 @@ function viewPhoto(url){
 // ── Modal helpers ──
 function openModal(id){ document.getElementById(id).classList.add('open') }
 function closeModal(id){ document.getElementById(id).classList.remove('open') }
+
+// ── Edit Project Info ──
+function openEditInfoModal(){
+  const p = STATE._project
+  if(!p) return
+  document.getElementById('ei-name').value         = p.name || ''
+  document.getElementById('ei-client').value       = p.client_name || ''
+  document.getElementById('ei-client-email').value = p.client_email || ''
+  document.getElementById('ei-address').value      = p.address || ''
+  document.getElementById('ei-start').value        = p.contract_date || ''
+  document.getElementById('ei-end').value          = p.est_completion || ''
+  document.getElementById('ei-pm').value           = p.pm || ''
+  document.getElementById('edit-info-modal').classList.add('open')
+}
+
+async function saveProjectInfo(){
+  const p = STATE._project
+  if(!p) return
+  const name = document.getElementById('ei-name').value.trim()
+  if(!name){ showToast('Project name is required'); return }
+  const fields = {
+    name,
+    client_name:    document.getElementById('ei-client').value.trim(),
+    client_email:   document.getElementById('ei-client-email').value.trim(),
+    address:        document.getElementById('ei-address').value.trim(),
+    contract_date:  document.getElementById('ei-start').value,
+    est_completion: document.getElementById('ei-end').value,
+    pm:             document.getElementById('ei-pm').value.trim(),
+  }
+  try {
+    await API.updateProject(p.id, fields)
+    Object.assign(STATE._project, fields)
+    closeModal('edit-info-modal')
+    document.getElementById('app').innerHTML = renderProject(STATE._project,STATE._cos,STATE._budget,STATE._tasks,STATE._decisions,STATE.role)
+    showToast('Project info updated')
+  } catch(e){ showToast('⚠ Failed to save') }
+}
 
 // Close modals on overlay click
 document.querySelectorAll('.modal-overlay').forEach(overlay=>{
