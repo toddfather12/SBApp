@@ -78,6 +78,13 @@ async function init() {
       UNIQUE(project_id, phase_id, dec_index)
     );
   `);
+  // Column migrations — silently ignored if column already exists
+  for (const sql of [
+    `ALTER TABLE projects ADD COLUMN project_type TEXT DEFAULT 'new_construction'`,
+    `ALTER TABLE projects ADD COLUMN work_scope TEXT DEFAULT ''`,
+  ]) {
+    try { await client.execute(sql) } catch (_) {}
+  }
 }
 
 module.exports = {
@@ -106,17 +113,18 @@ module.exports = {
     return r.rows[0] ?? null;
   },
 
-  async createProject({ name, client_name, address, contract_date, est_completion, pm }) {
+  async createProject({ name, client_name, address, contract_date, est_completion, pm, project_type, work_scope }) {
     const r = await client.execute({
-      sql: `INSERT INTO projects (name, client_name, address, contract_date, est_completion, pm)
-            VALUES (?, ?, ?, ?, ?, ?)`,
-      args: [name, client_name || '', address || '', contract_date || '', est_completion || '', pm || ''],
+      sql: `INSERT INTO projects (name, client_name, address, contract_date, est_completion, pm, project_type, work_scope)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [name, client_name || '', address || '', contract_date || '', est_completion || '', pm || '',
+             project_type || 'new_construction', work_scope || ''],
     });
     return Number(r.lastInsertRowid);
   },
 
   async updateProject(id, fields) {
-    const allowed = ['name', 'client_name', 'address', 'contract_date', 'est_completion', 'pm', 'status'];
+    const allowed = ['name', 'client_name', 'address', 'contract_date', 'est_completion', 'pm', 'status', 'project_type', 'work_scope'];
     const keys = Object.keys(fields).filter(k => allowed.includes(k));
     if (!keys.length) return;
     await client.execute({

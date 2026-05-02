@@ -421,6 +421,57 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);m
   .cb.cu{border-right:none}
   .strip{background:#1A2733!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+
+/* ── WIZARD ── */
+.scope-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0 8px}
+.scope-card{border:2px solid var(--border);border-radius:10px;padding:24px 16px;cursor:pointer;
+  transition:all .2s;text-align:center;user-select:none}
+.scope-card:hover{border-color:var(--terra);box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.scope-card.selected{border-color:var(--terra);background:rgba(184,80,56,.06)}
+.scope-icon{font-size:36px;margin-bottom:12px}
+.scope-title{font-family:'DM Serif Display';font-size:18px;color:var(--txt);margin-bottom:6px}
+.scope-desc{font-size:12px;color:var(--txt-m);line-height:1.5}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:8px;margin:14px 0}
+.cat-card{border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;cursor:pointer;
+  transition:all .15s;display:flex;align-items:center;gap:10px;user-select:none}
+.cat-card:hover{border-color:var(--terra);background:rgba(184,80,56,.04)}
+.cat-card.selected{border-color:var(--terra);background:rgba(184,80,56,.09)}
+.cat-cb{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:11px;color:white;transition:all .12s}
+.cat-card.selected .cat-cb{background:var(--terra);border-color:var(--terra)}
+.cat-label{font-size:13px;font-weight:500;color:var(--txt);line-height:1.3}
+.wiz-step-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.wiz-step-label{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--terra);
+  text-transform:uppercase;letter-spacing:1.5px}
+.wiz-dots{display:flex;gap:6px;align-items:center}
+.wiz-dot{width:8px;height:8px;border-radius:50%;background:#D5C9BC;transition:all .2s;flex-shrink:0}
+.wiz-dot.active{background:var(--terra);width:22px;border-radius:4px}
+.wiz-dot.done{background:var(--green)}
+.items-sec{margin-bottom:20px}
+.items-sec-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;
+  color:var(--terra);margin-bottom:10px}
+.item-row{display:flex;align-items:flex-start;gap:9px;padding:7px 10px;border-radius:5px;
+  cursor:pointer;transition:background .1s;user-select:none}
+.item-row:hover{background:var(--sand)}
+.item-cb{width:16px;height:16px;border-radius:3px;border:1.5px solid var(--border);flex-shrink:0;
+  margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;
+  font-weight:700;color:white;transition:all .12s}
+.item-row.checked .item-cb{background:var(--terra);border-color:var(--terra)}
+.item-label{font-size:13px;color:var(--txt);line-height:1.4}
+.scope-type-badge{display:inline-flex;align-items:center;gap:5px;font-family:'IBM Plex Mono',monospace;
+  font-size:9px;font-weight:500;padding:3px 10px;border-radius:4px;text-transform:uppercase;letter-spacing:1px}
+.stb-new{background:rgba(58,106,90,.12);color:var(--green);border:1px solid rgba(58,106,90,.3)}
+.stb-reno{background:rgba(184,80,56,.1);color:var(--terra);border:1px solid rgba(184,80,56,.3)}
+.work-scope-card{background:var(--pm-bg);border:1px solid var(--pm-bdr);border-radius:8px;
+  padding:16px 20px}
+.wsc-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;
+  color:#4A8AAA;margin-bottom:12px;font-family:'IBM Plex Mono',monospace}
+.wsc-cats{display:flex;flex-direction:column;gap:12px}
+.wsc-cat-name{font-size:13px;font-weight:600;color:var(--txt);margin-bottom:4px}
+.wsc-items{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.wsc-item{font-family:'IBM Plex Mono',monospace;font-size:10px;background:#E4EEF6;
+  color:#3A5870;padding:3px 9px;border-radius:3px;border:1px solid #C4D8E6}
+@media(max-width:600px){.scope-cards{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -893,6 +944,429 @@ const PHASES = [
 ];
 
 // ════════════════════════════════════════════════════════════
+//  REMODEL / RENOVATION  —  categories + work items
+// ════════════════════════════════════════════════════════════
+const REMODEL_CATEGORIES = [
+  { id:'kitchen', label:'Kitchen Remodel', icon:'🍳', items:[
+    {id:'kitchen_demo',        label:'Demo existing kitchen'},
+    {id:'kitchen_cabinets',    label:'New cabinets & hardware'},
+    {id:'kitchen_countertops', label:'New countertops'},
+    {id:'kitchen_backsplash',  label:'Backsplash tile'},
+    {id:'kitchen_flooring',    label:'New flooring'},
+    {id:'kitchen_appliances',  label:'New appliances'},
+    {id:'kitchen_plumbing',    label:'Plumbing (sink, dishwasher, disposal)'},
+    {id:'kitchen_electrical',  label:'Electrical (outlets, lighting, panel upgrade)'},
+    {id:'kitchen_drywall',     label:'Drywall / plaster repair or replacement'},
+  ]},
+  { id:'bathroom', label:'Bathroom Remodel', icon:'🚿', items:[
+    {id:'bath_demo',       label:'Demo existing bathroom'},
+    {id:'bath_tile',       label:'New tile (floor, shower, walls)'},
+    {id:'bath_vanity',     label:'New vanity & mirror'},
+    {id:'bath_shower_tub', label:'New shower / tub'},
+    {id:'bath_plumbing',   label:'Plumbing (fixtures, supply, drain)'},
+    {id:'bath_electrical', label:'Electrical (GFCI, lighting, exhaust fan)'},
+    {id:'bath_flooring',   label:'New flooring'},
+    {id:'bath_drywall',    label:'Drywall / cement board'},
+  ]},
+  { id:'addition', label:'Room Addition / Extension', icon:'🏠', items:[
+    {id:'add_foundation', label:'Foundation / slab'},
+    {id:'add_framing',    label:'Framing & structural'},
+    {id:'add_roofing',    label:'Roofing & exterior'},
+    {id:'add_windows',    label:'Windows & exterior doors'},
+    {id:'add_mep',        label:'MEP rough-in (plumbing, electrical, HVAC)'},
+    {id:'add_insulation', label:'Insulation'},
+    {id:'add_drywall',    label:'Drywall & finishes'},
+    {id:'add_flooring',   label:'Flooring'},
+  ]},
+  { id:'basement', label:'Basement Finish', icon:'⬇️', items:[
+    {id:'bsmt_framing',    label:'Framing & layout'},
+    {id:'bsmt_mep',        label:'Plumbing, electrical & HVAC'},
+    {id:'bsmt_insulation', label:'Insulation'},
+    {id:'bsmt_drywall',    label:'Drywall & ceiling'},
+    {id:'bsmt_flooring',   label:'Flooring'},
+    {id:'bsmt_bath',       label:'Bathroom (if applicable)'},
+    {id:'bsmt_egress',     label:'Egress windows / doors'},
+  ]},
+  { id:'master', label:'Master Suite / Bedroom', icon:'🛏️', items:[
+    {id:'master_closet',   label:'Walk-in closet build-out'},
+    {id:'master_bath',     label:'Master bath remodel'},
+    {id:'master_flooring', label:'New flooring'},
+    {id:'master_electric', label:'Electrical & lighting'},
+    {id:'master_drywall',  label:'Drywall & paint'},
+  ]},
+  { id:'exterior', label:'Exterior / Roof', icon:'🏡', items:[
+    {id:'ext_roof',    label:'Roof replacement'},
+    {id:'ext_siding',  label:'Siding replacement'},
+    {id:'ext_windows', label:'Window replacement'},
+    {id:'ext_doors',   label:'Exterior door replacement'},
+    {id:'ext_paint',   label:'Exterior paint'},
+    {id:'ext_gutters', label:'Gutters & downspouts'},
+    {id:'ext_deck',    label:'Deck / porch addition or repair'},
+  ]},
+  { id:'whole_house', label:'Full / Whole-House Renovation', icon:'🏘️', items:[
+    {id:'wh_demo',       label:'Full or partial demo'},
+    {id:'wh_structural', label:'Structural / load-bearing changes'},
+    {id:'wh_mep',        label:'Full MEP replacement or update'},
+    {id:'wh_insulation', label:'Insulation throughout'},
+    {id:'wh_drywall',    label:'Drywall throughout'},
+    {id:'wh_kitchen',    label:'Kitchen remodel'},
+    {id:'wh_baths',      label:'Bathroom remodel(s)'},
+    {id:'wh_flooring',   label:'Flooring throughout'},
+    {id:'wh_paint',      label:'Paint throughout'},
+  ]},
+  { id:'other', label:'Other / Custom Scope', icon:'🔧', items:[
+    {id:'other_demo',     label:'Demo work'},
+    {id:'other_framing',  label:'Framing / structural'},
+    {id:'other_mep',      label:'Plumbing / Electrical / HVAC'},
+    {id:'other_finishes', label:'Interior finishes'},
+    {id:'other_flooring', label:'Flooring'},
+    {id:'other_exterior', label:'Exterior work'},
+  ]},
+]
+
+// 10-phase remodel template — mirrors project.html PHASES structure
+const REMODEL_PHASES = [
+{
+  id:1, name:"Pre-Construction & Planning", dur:"Week 1–2", flags:["trigger"],
+  cu:{
+    what:"Before work begins, we review your full scope, confirm selections, submit permits, and lock in the schedule. This phase prevents costly surprises once crews are on site.",
+    decisions:[
+      "Sign off on complete scope of work before demo begins",
+      "Identify all long-lead selections (tile, cabinetry, countertops, fixtures) — items with 4–8 week lead times must be ordered now",
+      "Confirm temporary living arrangements or protected areas if staying in the home during work"
+    ],
+    comms:[
+      {f:"Day 1",  t:"Kickoff email: full scope, PM contact, and decision list sent"},
+      {f:"Weekly", t:"Friday update throughout pre-construction"}
+    ],
+    pay:null,
+    mstn:"Scope confirmed. Permits submitted. Long-lead items ordered. Schedule locked."
+  },
+  pm:{
+    tasks:[
+      {t:"Review scope of work in detail — verify against contract and client selections"},
+      {t:"Submit permit application with required drawings and engineering",fl:"insp",b:"jurisdiction varies"},
+      {t:"Order long-lead materials: tile, cabinetry, countertops, fixtures",fl:"trig",b:"4–8 wk lead time"},
+      {t:"Confirm subcontractor availability and lock schedule"},
+      {t:"Pre-construction walkthrough — document existing conditions with photos"},
+      {t:"Confirm dust/debris containment plan with homeowner"},
+      {t:"Confirm key and access arrangements with client"}
+    ],
+    costs:[
+      {item:"Permit fees",amt:null,note:"Varies by municipality and scope"},
+      {item:"Drawings / design fees",amt:null,note:"If applicable"},
+      {item:"Dumpster",amt:600,note:"Adjust for project size"},
+      {item:"Portable toilet",amt:250,note:"If needed"}
+    ],
+    subs:["Permit expediter (if needed)"]
+  }
+},
+{
+  id:2, name:"Demo & Site Preparation", dur:"Week 2–3", flags:["trigger"],
+  cu:{
+    what:"Existing materials are carefully removed per scope. Every area outside the work zone is protected. Debris is hauled away so your home stays livable throughout.",
+    decisions:[
+      "Confirm any items to salvage before demo begins (cabinets, fixtures, flooring)",
+      "Confirm which walls and structures are being modified or opened"
+    ],
+    comms:[
+      {f:"Milestone", t:"Before-and-after photo update when demo is complete — scope fully visible"},
+      {f:"Daily",     t:"PM check-in during demo week — unexpected conditions addressed immediately"}
+    ],
+    pay:null,
+    mstn:"Demo complete. Site prepped. Debris hauled. All scope confirmed in the open."
+  },
+  pm:{
+    tasks:[
+      {t:"Protect all non-demo areas — plastic barriers, floor protection, HVAC covers"},
+      {t:"Demo existing materials per scope: cabinets, tile, drywall, flooring as applicable"},
+      {t:"Check for unexpected conditions: mold, rot, outdated wiring or plumbing",fl:"trig",b:"change order if found"},
+      {t:"Haul all demo debris — dumpster staged and swapped when full"},
+      {t:"Document existing MEP rough-in locations with photos before covering"},
+      {t:"Confirm all structural modifications with engineer before proceeding",fl:"insp",b:"LBW requires engineering"}
+    ],
+    costs:[
+      {item:"Demo labor",amt:null,note:"Varies by scope"},
+      {item:"Haul-away / disposal",amt:null,note:"Per dumpster load"},
+      {item:"Mold / hazmat remediation",amt:null,note:"Change order if discovered"}
+    ],
+    subs:["Demo crew","Remediation contractor (if needed)"]
+  }
+},
+{
+  id:3, name:"Structural & Framing", dur:"Week 3–5", flags:["trigger","insp"],
+  cu:{
+    what:"Any structural changes, wall modifications, or addition framing are completed. This is the backbone of your remodel — when it's done right, it's invisible forever.",
+    decisions:[
+      "Confirm all load-bearing wall modifications with engineer-stamped drawings before opening walls",
+      "Window and door rough opening sizes — last chance to adjust before framing closes in"
+    ],
+    comms:[
+      {f:"Milestone", t:"Walk-through invited when framing is complete — see new layout in three dimensions"},
+      {f:"Weekly",    t:"Friday update"}
+    ],
+    pay:null,
+    mstn:"Structural work complete. Framing inspected. Ready for MEP rough-in."
+  },
+  pm:{
+    tasks:[
+      {t:"Obtain engineer or structural drawings for any load-bearing work",fl:"insp",b:"required for LBW"},
+      {t:"Frame new walls, openings, and addition structure per plans"},
+      {t:"Set window and door rough openings"},
+      {t:"Roof tie-in for addition (if applicable) — waterproof immediately",fl:"trig",b:"weather-sensitive"},
+      {t:"Framing inspection as required by permit",fl:"insp",b:"jurisdiction dependent"},
+      {t:"Coordinate MEP rough-in subs — confirm sequence and start date"}
+    ],
+    costs:[
+      {item:"Framing labor",amt:null,note:"Varies by scope"},
+      {item:"Lumber & materials",amt:null,note:"Quote per scope"},
+      {item:"Engineering (if required)",amt:null,note:"Load-bearing modifications"},
+      {item:"Roofing tie-in (addition only)",amt:null,note:"If applicable"}
+    ],
+    subs:["Framing crew","Structural engineer (if applicable)","Roofing crew (tie-in)"]
+  }
+},
+{
+  id:4, name:"MEP Rough-In & Inspections", dur:"Week 4–7", flags:["insp"],
+  cu:{
+    what:"All plumbing, electrical, and HVAC runs are roughed in before walls close. Outlet locations, fixture placements, and vent runs are finalized now — changes after drywall require opening walls.",
+    decisions:[
+      "Confirm all electrical outlet, switch, and lighting fixture locations",
+      "Confirm plumbing fixture locations (sink, toilet, shower head height and position)",
+      "HVAC register and return air locations"
+    ],
+    comms:[
+      {f:"Walk",   t:"Pre-drywall walk — strongly recommended to verify all rough-in locations with PM"},
+      {f:"Weekly", t:"Friday update"}
+    ],
+    pay:null,
+    mstn:"All MEP rough-ins complete and inspected. Ready for insulation and drywall."
+  },
+  pm:{
+    tasks:[
+      {t:"Coordinate plumbing, electrical, and HVAC sub sequence — they share walls",fl:"trig",b:"sequence critical"},
+      {t:"Plumbing rough-in complete → schedule rough plumbing inspection",fl:"insp",b:"required"},
+      {t:"Electrical rough-in complete → schedule rough electrical inspection",fl:"insp",b:"required"},
+      {t:"HVAC rough-in complete → schedule mechanical inspection (if applicable)",fl:"insp",b:"if permitted"},
+      {t:"Pre-drywall walk with client — document all locations with photos"},
+      {t:"Pre-insulation / pre-drywall inspection (if required by jurisdiction)",fl:"insp",b:"jurisdiction dependent"}
+    ],
+    costs:[
+      {item:"Plumbing rough-in",amt:null,note:"Quote per scope"},
+      {item:"Electrical rough-in",amt:null,note:"Quote per scope"},
+      {item:"HVAC rough-in / modifications",amt:null,note:"If applicable"}
+    ],
+    subs:["Plumber","Electrician","HVAC contractor"]
+  }
+},
+{
+  id:5, name:"Insulation & Drywall", dur:"Week 7–10", flags:[],
+  cu:{
+    what:"Insulation locks in energy efficiency and comfort. Drywall transforms open framing into real rooms — by the end the space has walls, ceilings, and shape for the first time.",
+    decisions:[
+      "Paint colors for all walls and ceilings — needed before painter schedules",
+      "Ceiling texture preference: smooth, knockdown, or match existing"
+    ],
+    comms:[
+      {f:"Milestone", t:"Photo when drywall is hung and finished — rooms feel real for the first time"},
+      {f:"Weekly",    t:"Friday update"}
+    ],
+    pay:null,
+    mstn:"Insulation installed. Drywall hung, taped, finished, and primed. Ready for finishes."
+  },
+  pm:{
+    tasks:[
+      {t:"Insulation installed — walls, ceilings, and exterior (if applicable)"},
+      {t:"Cement board / waterproof backer installed in wet areas (showers, tubs)"},
+      {t:"Drywall delivered and staged on site"},
+      {t:"Drywall hung — walls and ceilings"},
+      {t:"Tape, first mud coat, second coat, third coat / sand smooth"},
+      {t:"Primer coat applied — confirm paint colors before painter schedules",fl:"trig",b:"client decision needed"}
+    ],
+    costs:[
+      {item:"Insulation",amt:null,note:"Batts or spray foam per scope"},
+      {item:"Cement board (wet areas)",amt:null,note:"Showers, tub surrounds"},
+      {item:"Drywall material",amt:null,note:"Quote per scope"},
+      {item:"Hang and finish drywall (labor)",amt:null,note:"Quote per scope"}
+    ],
+    subs:["Insulation contractor","Drywall crew"]
+  }
+},
+{
+  id:6, name:"Tile Work", dur:"Week 9–12", flags:["trigger"],
+  cu:{
+    what:"All tile is installed — shower surrounds, floors, and kitchen backsplash. Tile is one of the most visible elements of a remodel and requires precision and patience.",
+    decisions:[
+      "Confirm all tile is purchased and on-site before crew mobilizes",
+      "Grout color selection — review sample on actual wall before committing",
+      "Tile layout pattern (straight, diagonal, herringbone, stacked)"
+    ],
+    comms:[
+      {f:"Milestone", t:"Photo when tile is laid before grout — last chance to adjust layout before it sets"},
+      {f:"Weekly",    t:"Friday update"}
+    ],
+    pay:null,
+    mstn:"All tile installed, grouted, and sealed. Ready for cabinets and fixtures."
+  },
+  pm:{
+    tasks:[
+      {t:"Confirm all tile, grout, and setting materials are on site before crew starts",fl:"trig",b:"verify delivery"},
+      {t:"Apply waterproofing membrane in wet areas (Schluter or approved equivalent)"},
+      {t:"Floor tile installed and leveled"},
+      {t:"Shower / tub surround tile installed"},
+      {t:"Kitchen backsplash tile installed (if applicable)"},
+      {t:"Grout applied — confirm color with client before committing",fl:"trig",b:"client sign-off required"},
+      {t:"Grout sealed after 48–72 hour cure"}
+    ],
+    costs:[
+      {item:"Tile material (floor)",amt:null,note:"Per allowance"},
+      {item:"Tile material (shower / walls)",amt:null,note:"Per allowance"},
+      {item:"Tile material (backsplash)",amt:null,note:"Per allowance — if applicable"},
+      {item:"Tile setting labor",amt:null,note:"Quote per sq ft"},
+      {item:"Waterproofing membrane (wet areas)",amt:null,note:"Schluter or equivalent"}
+    ],
+    subs:["Tile setter"]
+  }
+},
+{
+  id:7, name:"Cabinets, Vanities & Countertops", dur:"Week 11–14", flags:["trigger"],
+  cu:{
+    what:"Cabinets and vanities go in, and countertops are templated immediately after. Kitchens and bathrooms start to look finished for the first time — one of the most rewarding milestones.",
+    decisions:[
+      "Cabinet hardware (knobs and pulls) — ordered separately from cabinet boxes",
+      "Countertop material, color, and edge profile — template happens immediately after install",
+      "Confirm all vanity selections are on-site before installation begins"
+    ],
+    comms:[
+      {f:"Milestone", t:"Photo when cabinets are installed — first real look at kitchen and bath layout"},
+      {f:"Weekly",    t:"Friday update"}
+    ],
+    pay:null,
+    mstn:"Cabinets and vanities installed. Countertops templated, fabricated, and set."
+  },
+  pm:{
+    tasks:[
+      {t:"Measure cabinet dimensions after drywall is finished — do not order before",fl:"trig",b:"measure post-drywall"},
+      {t:"Confirm cabinet delivery date and coordinate with installer"},
+      {t:"Cabinets installed and leveled"},
+      {t:"Vanities installed (bath)"},
+      {t:"Schedule countertop template IMMEDIATELY after cabinet install",fl:"trig",b:"1–2 wk fabrication"},
+      {t:"Countertops fabricated and installed"},
+      {t:"Shower doors and tub surrounds installed (if applicable)"},
+      {t:"Mirrors installed"}
+    ],
+    costs:[
+      {item:"Cabinets",amt:null,note:"Per allowance"},
+      {item:"Vanities",amt:null,note:"Per allowance"},
+      {item:"Countertops / granite",amt:null,note:"Per allowance"},
+      {item:"Shower doors",amt:null,note:"Per allowance — if applicable"},
+      {item:"Mirrors",amt:null,note:"Per allowance"}
+    ],
+    subs:["Cabinet installer","Countertop fabricator"]
+  }
+},
+{
+  id:8, name:"Flooring", dur:"Week 13–15", flags:[],
+  cu:{
+    what:"Flooring transforms the space immediately — installed after cabinets but before trim and fixtures. The selections you made months ago finally become real.",
+    decisions:[
+      "Confirm flooring material and color selections are purchased and on-site",
+      "Confirm transitions between flooring types (thresholds, reducers)"
+    ],
+    comms:[
+      {f:"Milestone", t:"Photo when flooring is complete — the room visually comes together here"},
+      {f:"Weekly",    t:"Friday update"}
+    ],
+    pay:null,
+    mstn:"All flooring installed. Transitions set. Protected and ready for MEP trim-out."
+  },
+  pm:{
+    tasks:[
+      {t:"Subfloor prep — level, clean, and repair as needed before installation"},
+      {t:"LVP / hardwood flooring installed"},
+      {t:"Carpet installed (if applicable)"},
+      {t:"Floor transitions and thresholds set"},
+      {t:"Stair treads and risers finished (if applicable)"},
+      {t:"Floor protection applied — maintain through project completion"}
+    ],
+    costs:[
+      {item:"LVP / hardwood material & labor",amt:null,note:"Per allowance"},
+      {item:"Carpet material & labor",amt:null,note:"Per allowance — if applicable"},
+      {item:"Subfloor prep / leveling",amt:null,note:"As needed"}
+    ],
+    subs:["Flooring crew"]
+  }
+},
+{
+  id:9, name:"MEP Trim-Out & Fixtures", dur:"Week 15–17", flags:["insp"],
+  cu:{
+    what:"Plumbing fixtures, electrical outlets and lighting, and HVAC registers are all set and tested. Appliances are installed. The home is nearly complete and every system is operational.",
+    decisions:[
+      "Confirm all fixtures are on-site before trim-out crews schedule",
+      "Appliance delivery window — coordinate with PM at least one week ahead"
+    ],
+    comms:[
+      {f:"Weekly", t:"Friday update — confirm fixtures and appliances are on-site and ready"}
+    ],
+    pay:null,
+    mstn:"All MEP trim-out complete. Appliances installed. Systems tested. Ready for punch list."
+  },
+  pm:{
+    tasks:[
+      {t:"Plumbing trim-out: faucets, toilets, shower valves, tub fixtures",fl:"insp",b:"plumbing final"},
+      {t:"Electrical trim-out: outlets, switches, panel schedule, all light fixtures",fl:"insp",b:"electrical final"},
+      {t:"HVAC trim-out: registers, thermostat, equipment startup and test (if applicable)"},
+      {t:"Appliances delivered and installed"},
+      {t:"Final MEP inspections as required by permit",fl:"insp",b:"jurisdiction dependent"},
+      {t:"Test all fixtures, appliances, and systems before punch list walk"}
+    ],
+    costs:[
+      {item:"Plumbing fixtures & trim-out labor",amt:null,note:"Per allowance"},
+      {item:"Electrical fixtures & trim-out labor",amt:null,note:"Per allowance"},
+      {item:"Appliances",amt:null,note:"Per allowance"},
+      {item:"HVAC trim-out",amt:null,note:"If applicable"}
+    ],
+    subs:["Plumber (trim-out)","Electrician (trim-out)","HVAC contractor (trim-out)"]
+  }
+},
+{
+  id:10, name:"Paint, Finishes & Close-Out", dur:"Week 17–19", flags:["pay"],
+  cu:{
+    what:"Final paint, trim, doors, and hardware complete the space. We walk every room together and document anything that needs correction. Your home is delivered clean, complete, and signed off.",
+    decisions:[],
+    comms:[
+      {f:"Walk",  t:"Punch-list walk — you flag everything, PM documents and assigns corrections"},
+      {f:"Final", t:"Final walk-through and project handoff — keys, warranties, and documentation"}
+    ],
+    pay:"Final payment due at project completion and client sign-off.",
+    mstn:"Paint and finishes complete. Punch list signed off. Clean home delivered. Project closed."
+  },
+  pm:{
+    tasks:[
+      {t:"Interior paint — walls, ceilings, and trim (if not completed in Phase 5)"},
+      {t:"Interior doors hung and hardware installed"},
+      {t:"Baseboard, casing, and trim work complete"},
+      {t:"Cabinet hardware installed"},
+      {t:"Touch-up paint throughout the work area"},
+      {t:"Punch-list walk with client — document all items",fl:"trig",b:"before final payment"},
+      {t:"All punch-list items corrected and signed off by client"},
+      {t:"Professional deep clean of entire work area"},
+      {t:"Final walk-through and client sign-off"},
+      {t:"Collect final payment and deliver warranties, permits, and documentation"}
+    ],
+    costs:[
+      {item:"Paint (material + labor)",amt:null,note:"Per allowance"},
+      {item:"Interior doors & hardware",amt:null,note:"Per allowance — if applicable"},
+      {item:"Trim & millwork",amt:null,note:"Per allowance"},
+      {item:"Professional cleaning",amt:null,note:"Full work area deep clean"},
+      {item:"Punch list contingency",amt:null,note:"Allow 3–5% of project cost"}
+    ],
+    subs:["Painting crew","Trim carpenter","Cleaning crew"]
+  }
+}
+];
+
+// ════════════════════════════════════════════════════════════
 //  API  (server-backed)
 // ════════════════════════════════════════════════════════════
 const API = {
@@ -945,6 +1419,7 @@ const Photos = {
 // ════════════════════════════════════════════════════════════
 let STATE = {view:'dashboard',projectId:null,role:'pm',openPhases:new Set([1]),
              _project:null,_cos:[],_budget:[],_tasks:{},_decisions:{}}
+let _wizard = { step:1, type:null, cats:new Set(), items:{} }
 let _pendingCOProjectId=null,_pendingCOId=null,_pendingPhotoPhaseId=null,_pendingPhotoProjectId=null
 
 function navigate(hash){ window.location.hash = hash }
@@ -955,6 +1430,7 @@ async function parseHash(){
     STATE.view='dashboard'; STATE.projectId=null; STATE.role='pm'
   } else if(h==='new'){
     STATE.view='new-project'
+    _wizard = { step:1, type:null, cats:new Set(), items:{} }
   } else if(h.startsWith('p/')){
     const parts = h.split('/')
     const prevId = STATE.projectId
@@ -998,7 +1474,8 @@ async function renderApp(){
     // Auto-seed budget items for projects created before this feature existed
     if(!budget.length){
       const items = []
-      for(const ph of PHASES)
+      const _seedPhases = proj.project_type==='remodel' ? REMODEL_PHASES : PHASES
+      for(const ph of _seedPhases)
         for(const c of (ph.pm.costs||[]))
           items.push({phase_id:ph.id, item:c.item, amt:c.amt??null, note:c.note||''})
       try {
@@ -1024,7 +1501,6 @@ function _rerender(){
 // ── Dashboard ──
 function renderDashboard(projects){
   const list = projects.filter(p=>p.status!=='archived')
-  const totalTasks = PHASES.reduce((s,ph)=>s+ph.pm.tasks.length,0)
 
   const topbar = `<div class="topbar">
     <div class="tb-brand" onclick="navigate('')">
@@ -1047,16 +1523,22 @@ function renderDashboard(projects){
   }
 
   const cards = list.map(proj=>{
+    const projPhases = proj.project_type==='remodel' ? REMODEL_PHASES : PHASES
+    const totalTasks = projPhases.reduce((s,ph)=>s+ph.pm.tasks.length,0)
     const pending = Number(proj.cos_pending)||0
     const signed  = Number(proj.cos_signed)||0
     const done    = Number(proj.tasks_done)||0
     const pct     = totalTasks ? Math.round(done/totalTasks*100) : 0
+    const scopeBadge = proj.project_type==='remodel'
+      ? `<span class="scope-type-badge stb-reno" style="margin-top:-2px">🔨 Remodel</span>`
+      : `<span class="scope-type-badge stb-new" style="margin-top:-2px">🏗️ New Construction</span>`
     const badges  = [
       pending?`<span class="badge badge-pending">⚠ ${pending} pending CO${pending>1?'s':''}</span>`:'',
       signed ?`<span class="badge badge-signed">✓ ${signed} approved</span>`:''
     ].filter(Boolean).join('')
     return `<div class="proj-card" onclick="navigate('p/${proj.id}')">
       <div class="pc-name">${esc(proj.name)}</div>
+      ${scopeBadge}
       <div class="pc-meta">
         <div class="pc-row"><span class="pc-icon">👤</span>${esc(proj.client_name)||'—'}</div>
         <div class="pc-row"><span class="pc-icon">📍</span>${esc(proj.address)||'—'}</div>
@@ -1080,26 +1562,105 @@ function renderDashboard(projects){
   </div>`
 }
 
-// ── New Project Form ──
+// ── New Project Wizard ──
 function renderProjectForm(){
-  return `<div class="topbar">
+  const topbar = `<div class="topbar">
     <div class="tb-brand" onclick="navigate('')">
       <span class="tb-logo">Southern Bay Construction</span>
       <div class="tb-sep"></div>
       <span class="tb-title">New Project</span>
     </div>
-  </div>
-  <div class="dashboard"><div class="form-wrap">
-    <div class="form-h">New Construction Project</div>
-    <p class="form-sub">Enter the project details below. All 10 phases, task checklists, and cost estimates are created automatically and are editable per project.</p>
+  </div>`
+  const w = _wizard
+  const totalSteps = w.type==='remodel' ? 4 : 2
+
+  function stepBar(step){
+    const label = w.type ? `Step ${step} of ${totalSteps}` : `Step ${step}`
+    const count = w.type ? totalSteps : 2
+    const dots = Array.from({length:count}, (_,i) =>
+      `<div class="wiz-dot ${i+1<step?'done':i+1===step?'active':''}"></div>`
+    ).join('')
+    return `<div class="wiz-step-bar"><span class="wiz-step-label">${label}</span><div class="wiz-dots">${dots}</div></div>`
+  }
+
+  let body
+  if(w.step===1){
+    body = `${stepBar(1)}
+    <div class="form-h">Project Scope</div>
+    <p class="form-sub">Choose the project type. This determines which phases, task checklists, and cost items are generated automatically.</p>
+    <div class="scope-cards">
+      <div class="scope-card${w.type==='new_construction'?' selected':''}" onclick="_selectScope('new_construction')">
+        <div class="scope-icon">🏗️</div>
+        <div class="scope-title">New Construction</div>
+        <div class="scope-desc">Building from the ground up — foundation, framing, mechanical, and finishes through final walk-through.</div>
+      </div>
+      <div class="scope-card${w.type==='remodel'?' selected':''}" onclick="_selectScope('remodel')">
+        <div class="scope-icon">🔨</div>
+        <div class="scope-title">Remodel / Renovation</div>
+        <div class="scope-desc">Updating, improving, or expanding an existing structure — kitchen, bath, addition, or whole house.</div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="navigate('')">Cancel</button>
+      <button class="btn btn-primary" onclick="_wizardNext()"${!w.type?' disabled':''}>Next →</button>
+    </div>`
+  } else if(w.step===2 && w.type==='remodel'){
+    const cats = REMODEL_CATEGORIES.map(cat=>{
+      const sel = w.cats.has(cat.id)
+      return `<div class="cat-card${sel?' selected':''}" onclick="_toggleCat('${cat.id}')">
+        <div class="cat-cb">${sel?'✓':''}</div>
+        <div class="cat-label">${cat.icon} ${cat.label}</div>
+      </div>`
+    }).join('')
+    body = `${stepBar(2)}
+    <div class="form-h">Work Categories</div>
+    <p class="form-sub">Select all that apply. You can always adjust scope on the project page after creation.</p>
+    <div class="cat-grid">${cats}</div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="_wizardBack()">← Back</button>
+      <button class="btn btn-primary" onclick="_wizardNext()"${w.cats.size===0?' disabled':''}>Next →</button>
+    </div>`
+  } else if(w.step===3 && w.type==='remodel'){
+    const secs = [...w.cats].map(catId=>{
+      const cat = REMODEL_CATEGORIES.find(c=>c.id===catId)
+      if(!cat) return ''
+      const rows = cat.items.map(item=>{
+        const checked = (w.items[catId]||[]).includes(item.id)
+        return `<div class="item-row${checked?' checked':''}" onclick="_toggleItem('${catId}','${item.id}')">
+          <div class="item-cb">${checked?'✓':''}</div>
+          <span class="item-label">${item.label}</span>
+        </div>`
+      }).join('')
+      return `<div class="items-sec">
+        <div class="items-sec-title">${cat.icon} ${cat.label}</div>
+        ${rows}
+      </div>`
+    }).join('')
+    body = `${stepBar(3)}
+    <div class="form-h">Work Details</div>
+    <p class="form-sub">Check the specific items being done. This builds the scope summary and pre-populates cost line items. All optional — you can edit after creation.</p>
+    <div style="max-height:360px;overflow-y:auto;padding-right:4px;margin:16px 0">${secs}</div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="_wizardBack()">← Back</button>
+      <button class="btn btn-primary" onclick="_wizardNext()">Next →</button>
+    </div>`
+  } else {
+    const isRemodel = w.type==='remodel'
+    const stepNum   = isRemodel ? 4 : 2
+    const scopeTag  = isRemodel
+      ? `<div style="margin-bottom:16px"><span class="scope-type-badge stb-reno">🔨 Remodel / Renovation</span></div>`
+      : `<div style="margin-bottom:16px"><span class="scope-type-badge stb-new">🏗️ New Construction</span></div>`
+    body = `${stepBar(stepNum)}
+    <div class="form-h">Project Details</div>
+    ${scopeTag}
     <div class="form-grid">
       <div class="form-field form-full">
         <label class="form-label">Project Name *</label>
-        <input class="form-input" id="f-name" placeholder="e.g. Smith Residence — Custom Home Build">
+        <input class="form-input" id="f-name" placeholder="${isRemodel?'e.g. Johnson Kitchen &amp; Bath Remodel':'e.g. Smith Residence — Custom Home Build'}">
       </div>
       <div class="form-field">
         <label class="form-label">Client Name</label>
-        <input class="form-input" id="f-client" placeholder="John & Jane Smith">
+        <input class="form-input" id="f-client" placeholder="John &amp; Jane Smith">
       </div>
       <div class="form-field">
         <label class="form-label">Property Address</label>
@@ -1119,10 +1680,11 @@ function renderProjectForm(){
       </div>
     </div>
     <div class="form-actions">
-      <button class="btn btn-outline" onclick="navigate('')">Cancel</button>
+      <button class="btn btn-outline" onclick="_wizardBack()">← Back</button>
       <button class="btn btn-primary" onclick="createProject()">Create Project →</button>
-    </div>
-  </div></div>`
+    </div>`
+  }
+  return topbar+`<div class="dashboard"><div class="form-wrap">${body}</div></div>`
 }
 
 // ── Project View ──
@@ -1136,7 +1698,9 @@ function renderProject(proj, cos, budget, tasks, decisions, role){
   const pendingTotal = pendingCOs.reduce((s,co)=>s+(parseFloat(co.amount)||0),0)
   const approvedTotal = baseTotal+signedTotal
 
-  const totalTasks = PHASES.reduce((s,ph)=>s+ph.pm.tasks.length,0)
+  const phases     = proj.project_type==='remodel' ? REMODEL_PHASES : PHASES
+  const isRemodel  = proj.project_type==='remodel'
+  const totalTasks = phases.reduce((s,ph)=>s+ph.pm.tasks.length,0)
   const doneTasks  = Object.values(tasks).filter(Boolean).length
   const pct = Math.round(doneTasks/totalTasks*100)
 
@@ -1222,18 +1786,38 @@ function renderProject(proj, cos, budget, tasks, decisions, role){
   </div>` : ''
 
   const phasesHtml = `<div class="phases">
-    ${PHASES.map(ph=>renderPhase(ph,proj,role,budget,tasks,decisions,cos)).join('')}
+    ${phases.map(ph=>renderPhase(ph,proj,role,budget,tasks,decisions,cos)).join('')}
   </div>`
+
+  let workScopeHtml = ''
+  if(isPM && isRemodel && proj.work_scope){
+    try {
+      const scope = JSON.parse(proj.work_scope)
+      if(scope && scope.length){
+        workScopeHtml = `<div style="padding:0 24px 16px"><div class="work-scope-card">
+          <div class="wsc-title">Remodel Scope of Work</div>
+          <div class="wsc-cats">
+            ${scope.map(cat=>`<div>
+              <div class="wsc-cat-name">${esc(cat.label)}</div>
+              ${cat.items.length
+                ? `<div class="wsc-items">${cat.items.map(it=>`<span class="wsc-item">${esc(it.label)}</span>`).join('')}</div>`
+                : `<div style="font-size:12px;color:var(--txt-l);margin-top:2px">General scope — no specific items listed</div>`}
+            </div>`).join('')}
+          </div>
+        </div></div>`
+      }
+    } catch(_){}
+  }
 
   const summary = isPM ? `<div class="summary">
     <div class="ss"><div class="sn">10</div><div class="sl">phases</div></div>
-    <div class="ss"><div class="sn">20–26</div><div class="sl">est. weeks</div></div>
-    <div class="ss"><div class="sn">3</div><div class="sl">payment milestones</div></div>
+    <div class="ss"><div class="sn">${isRemodel?'8–20':'20–26'}</div><div class="sl">est. weeks</div></div>
+    <div class="ss"><div class="sn">${isRemodel?'1':'3'}</div><div class="sl">payment milestone${isRemodel?'':'s'}</div></div>
     <div class="ss"><div class="sn">${fmt(approvedTotal)}</div><div class="sl">approved total</div></div>
-    <div class="sf2">Edwards Home reference: $393,295 base · 12% contractor fee ($47,195) · Line items are editable per project</div>
+    <div class="sf2">${isRemodel?'Remodel project · Cost line items start at $0 — click any amount to enter your project quote':'Edwards Home reference: $393,295 base · 12% contractor fee ($47,195) · Line items are editable per project'}</div>
   </div>` : ''
 
-  return topbar+breadcrumb+meta+progressBar+cuWelcome+budgetPanel+coPanel+legend+phasesHtml+summary
+  return topbar+breadcrumb+meta+workScopeHtml+progressBar+cuWelcome+budgetPanel+coPanel+legend+phasesHtml+summary
 }
 
 // ── Change Orders Panel ──
@@ -1244,7 +1828,7 @@ function renderCOPanel(pid, cos, role){
   const items = !cos.length
     ? `<div class="co-empty">${isPM?'No change orders yet. Use "+ Change Order" to document scope changes for customer approval.':'No change orders at this time.'}</div>`
     : cos.map(co=>{
-        const ph = PHASES.find(p=>p.id===parseInt(co.phase_id))
+        const ph = _phases().find(p=>p.id===parseInt(co.phase_id))
         const phName = ph?ph.name:`Phase ${co.phase_id}`
         const pill = {
           pending:`<span class="co-status-pill csp-pending">Pending Approval</span>`,
@@ -1444,18 +2028,72 @@ function renderPhase(ph, proj, role, budget, tasks, decisions, allCos){
 }
 
 // ════════════════════════════════════════════════════════════
+//  WIZARD HELPERS
+// ════════════════════════════════════════════════════════════
+
+function _phases(){ return STATE._project?.project_type==='remodel' ? REMODEL_PHASES : PHASES }
+
+function _selectScope(type){ _wizard.type=type; renderApp() }
+
+function _toggleCat(catId){
+  if(_wizard.cats.has(catId)){ _wizard.cats.delete(catId); delete _wizard.items[catId] }
+  else _wizard.cats.add(catId)
+  renderApp()
+}
+
+function _toggleItem(catId, itemId){
+  if(!_wizard.items[catId]) _wizard.items[catId]=[]
+  const arr=_wizard.items[catId], idx=arr.indexOf(itemId)
+  idx>=0 ? arr.splice(idx,1) : arr.push(itemId)
+  renderApp()
+}
+
+function _wizardNext(){
+  const w=_wizard
+  if(w.step===1 && w.type){ w.step=2 }
+  else if(w.step===2 && w.type==='remodel' && w.cats.size>0){ w.step=3 }
+  else if(w.step===3){ w.step=4 }
+  renderApp()
+}
+
+function _wizardBack(){
+  const w=_wizard
+  if(w.step===2) w.step=1
+  else if(w.step===3) w.step=2
+  else if(w.step===4) w.step=w.type==='remodel'?3:1
+  renderApp()
+}
+
+function _getWorkScope(){
+  const scope=[]
+  for(const catId of _wizard.cats){
+    const cat=REMODEL_CATEGORIES.find(c=>c.id===catId)
+    if(!cat) continue
+    scope.push({id:catId, label:cat.label,
+      items:(_wizard.items[catId]||[]).map(iid=>{
+        const it=cat.items.find(i=>i.id===iid)
+        return it?{id:iid,label:it.label}:null
+      }).filter(Boolean)
+    })
+  }
+  return scope
+}
+
+// ════════════════════════════════════════════════════════════
 //  ACTIONS
 // ════════════════════════════════════════════════════════════
 
 async function createProject(){
   const name = document.getElementById('f-name').value.trim()
   if(!name){ showToast('⚠ Project name is required'); return }
+  const projectPhases = _wizard.type==='remodel' ? REMODEL_PHASES : PHASES
   const budget_items = []
-  for(const ph of PHASES){
+  for(const ph of projectPhases){
     for(const c of (ph.pm.costs||[])){
       budget_items.push({phase_id:ph.id, item:c.item, amt:c.amt??null, note:c.note||''})
     }
   }
+  const work_scope = _wizard.type==='remodel' ? JSON.stringify(_getWorkScope()) : ''
   try {
     const result = await API.createProject({
       name,
@@ -1464,6 +2102,8 @@ async function createProject(){
       contract_date:  document.getElementById('f-start').value,
       est_completion: document.getElementById('f-end').value,
       pm:             document.getElementById('f-pm').value.trim(),
+      project_type:   _wizard.type || 'new_construction',
+      work_scope,
       budget_items,
     })
     navigate('p/'+result.id)
@@ -1532,7 +2172,7 @@ function startBudgetEdit(td){
 function openCOModal(pid){
   _pendingCOProjectId = pid
   const sel = document.getElementById('co-phase')
-  sel.innerHTML = PHASES.map(p=>`<option value="${p.id}">Phase ${String(p.id).padStart(2,'0')}: ${p.name}</option>`).join('')
+  sel.innerHTML = _phases().map(p=>`<option value="${p.id}">Phase ${String(p.id).padStart(2,'0')}: ${p.name}</option>`).join('')
   document.getElementById('co-title').value = ''
   document.getElementById('co-desc').value  = ''
   document.getElementById('co-amount').value = ''
@@ -1559,7 +2199,7 @@ function openSignModal(pid, coId){
   _pendingCOProjectId = pid
   _pendingCOId = coId
   const co = STATE._cos&&STATE._cos.find(c=>c.id===coId); if(!co) return
-  const ph = PHASES.find(p=>p.id===parseInt(co.phase_id))
+  const ph = _phases().find(p=>p.id===parseInt(co.phase_id))
   document.getElementById('sign-modal-title').textContent = co.title
   document.getElementById('sign-modal-detail').innerHTML = `
     <div class="co-review-box">
