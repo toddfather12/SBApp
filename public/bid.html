@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bid Estimator — Southern Bay Construction</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --dark:#1A2733; --mid:#2C3E50; --terra:#B85038; --amber:#C49A3C;
+    --cream:#F7F2EB; --sand:#EDE5D8; --white:#FFFFFF; --txt:#2C3440;
+    --txt-m:#5A6A7A; --txt-l:#8A9AB0; --border:#D5C9BC; --green:#3A6A5A;
+    --green-l:#EAF3E8; --blue:#2A5A8A; --blue-l:#E8F0F8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);min-height:100vh}
+
+  /* HEADER */
+  .header{background:var(--dark);border-bottom:3px solid var(--amber);padding:0 32px;height:60px;
+    display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;gap:16px}
+  .h-left{display:flex;align-items:center;gap:12px;min-width:0}
+  .h-back{color:#6A8AA0;text-decoration:none;font-size:12px;font-weight:500;
+    display:flex;align-items:center;gap:5px;white-space:nowrap;transition:color .15s}
+  .h-back:hover{color:var(--white)}
+  .h-sep{width:1px;height:20px;background:#2C3E50;flex-shrink:0}
+  .h-name{font-family:'DM Serif Display';font-size:17px;color:var(--white);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .h-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+
+  /* STATUS PILLS */
+  .status-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .status-pill{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;
+    padding:5px 12px;border-radius:4px;cursor:pointer;transition:all .15s;border:1px solid transparent;
+    letter-spacing:.5px;text-transform:uppercase}
+  .pill-draft{background:#1A2020;color:#8AABB0;border-color:#253040}
+  .pill-submitted{background:#1E1800;color:#C49A3C;border-color:#3A3010}
+  .pill-accepted{background:#0F2A1A;color:#5AAA80;border-color:#204030}
+  .pill-rejected{background:#2A0F0F;color:#AA5A5A;border-color:#401020}
+  .pill-draft.active,.pill-draft:hover{background:#253040;color:var(--white);border-color:#4A6A80}
+  .pill-submitted.active,.pill-submitted:hover{background:#3A3010;color:var(--amber);border-color:var(--amber)}
+  .pill-accepted.active,.pill-accepted:hover{background:#204030;color:#7ACA9A;border-color:var(--green)}
+  .pill-rejected.active,.pill-rejected:hover{background:#401020;color:#CA7A7A;border-color:#804040}
+
+  .btn-convert{background:var(--green);color:#fff;border:none;border-radius:6px;
+    padding:8px 16px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;
+    cursor:pointer;transition:background .15s;white-space:nowrap}
+  .btn-convert:hover{background:#2A5A4A}
+  .btn-convert:disabled{background:#4A6A5A;cursor:default;opacity:.6}
+
+  /* CONTENT */
+  .page{max-width:1100px;margin:0 auto;padding:28px 24px}
+
+  /* CONVERTED BANNER */
+  .converted-banner{background:var(--green-l);border:1px solid var(--green);border-radius:8px;
+    padding:12px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .converted-banner.hidden{display:none}
+  .cb-text{font-size:13px;color:var(--green);font-weight:500}
+  .cb-link{color:var(--green);font-weight:600;text-decoration:none}
+  .cb-link:hover{text-decoration:underline}
+
+  /* METADATA PANEL */
+  .meta-panel{background:var(--white);border:1px solid var(--border);border-radius:10px;
+    overflow:hidden;margin-bottom:24px}
+  .meta-head{background:var(--dark);padding:14px 20px;display:flex;align-items:center;
+    justify-content:space-between}
+  .meta-title{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;
+    color:var(--amber);letter-spacing:2px;text-transform:uppercase}
+  .meta-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0;
+    border-bottom:1px solid var(--border)}
+  .meta-field{padding:14px 20px;border-right:1px solid var(--border)}
+  .meta-field:last-child{border-right:none}
+  .mf-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;
+    color:var(--amber);margin-bottom:6px}
+  .mf-input{font-family:'DM Sans',sans-serif;font-size:13px;border:none;outline:none;
+    color:var(--txt);background:transparent;width:100%;padding:0}
+  .mf-input::placeholder{color:var(--txt-l);font-style:italic}
+  .mf-input:focus{color:var(--txt)}
+  .meta-notes{padding:14px 20px}
+  .notes-input{font-family:'DM Sans',sans-serif;font-size:13px;border:none;outline:none;
+    color:var(--txt);background:transparent;width:100%;resize:none;line-height:1.5;
+    min-height:60px}
+  .notes-input::placeholder{color:var(--txt-l);font-style:italic}
+
+  /* PHASES */
+  .phases-section{margin-bottom:24px}
+  .phases-title{font-family:'DM Serif Display';font-size:20px;color:var(--txt);margin-bottom:16px}
+
+  .phase{background:var(--white);border:1px solid var(--border);border-radius:8px;
+    overflow:hidden;margin-bottom:10px}
+  .phase-header{padding:14px 20px;display:flex;align-items:center;gap:12px;cursor:pointer;
+    transition:background .15s;user-select:none}
+  .phase-header:hover{background:var(--sand)}
+  .ph-num{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;
+    color:var(--amber);letter-spacing:1px;flex-shrink:0;width:20px}
+  .ph-name{font-size:14px;font-weight:600;color:var(--txt);flex:1}
+  .ph-meta{display:flex;align-items:center;gap:16px;flex-shrink:0}
+  .ph-count{font-size:11px;color:var(--txt-l)}
+  .ph-subtotal{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--amber);font-weight:500}
+  .ph-chevron{font-size:10px;color:var(--txt-l);transition:transform .2s;flex-shrink:0}
+  .phase.open .ph-chevron{transform:rotate(180deg)}
+
+  .phase-body{display:none;border-top:1px solid var(--border)}
+  .phase.open .phase-body{display:block}
+
+  /* LINE ITEMS TABLE */
+  .li-table{width:100%;border-collapse:collapse;font-size:12px}
+  .li-table th{background:var(--sand);padding:8px 10px;text-align:left;
+    font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1px;
+    color:var(--txt-m);border-bottom:1px solid var(--border)}
+  .li-table th.num{text-align:right}
+  .li-row td{padding:0;border-bottom:1px solid var(--border);vertical-align:middle}
+  .li-row:last-child td{border-bottom:none}
+  .li-row:hover{background:#FAFAF8}
+  .li-input{font-family:'DM Sans',sans-serif;font-size:12px;border:none;outline:none;
+    background:transparent;color:var(--txt);padding:9px 10px;width:100%;height:100%}
+  .li-input:focus{background:#FFF9F0}
+  .li-input.num{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11px}
+  .li-select{font-family:'DM Sans',sans-serif;font-size:11px;border:none;outline:none;
+    background:transparent;color:var(--txt);padding:9px 10px;width:100%;cursor:pointer;
+    font-weight:600;-webkit-appearance:none}
+  .cat-labor .li-select{color:#2A5A8A}
+  .cat-material .li-select{color:#5A7A3A}
+  .cat-subcontractor .li-select{color:#7A3A7A}
+  .li-total{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txt);
+    padding:9px 10px;text-align:right;white-space:nowrap}
+  .li-del{padding:0 6px 0 2px;text-align:center;width:32px}
+  .btn-del-row{background:none;border:none;cursor:pointer;color:var(--txt-l);
+    font-size:14px;padding:8px 6px;transition:color .15s;line-height:1}
+  .btn-del-row:hover{color:#C04030}
+  .td-cat{width:110px}
+  .td-desc{min-width:160px}
+  .td-qty{width:70px}
+  .td-unit{width:70px}
+  .td-cost{width:90px}
+  .td-markup{width:75px}
+  .td-total{width:90px}
+  .td-del{width:32px}
+
+  .phase-add{padding:10px 20px;background:var(--sand);display:flex;align-items:center;
+    justify-content:space-between;gap:16px}
+  .btn-add-item{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;
+    color:var(--amber);background:none;border:1.5px dashed var(--amber);
+    border-radius:5px;padding:5px 14px;cursor:pointer;transition:all .15s;letter-spacing:.2px}
+  .btn-add-item:hover{background:rgba(196,154,60,.08)}
+  .phase-sub{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txt-m)}
+
+  /* SUMMARY PANEL */
+  .summary{background:var(--white);border:1px solid var(--border);border-radius:10px;
+    overflow:hidden}
+  .summary-head{background:var(--dark);padding:14px 20px}
+  .summary-title{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;
+    color:var(--amber);letter-spacing:2px;text-transform:uppercase}
+  .summary-body{padding:20px}
+  .sum-phases{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+  .sum-phase-row{display:flex;justify-content:space-between;align-items:center;
+    padding:4px 0;font-size:12px}
+  .sum-phase-name{color:var(--txt-m)}
+  .sum-phase-val{font-family:'IBM Plex Mono',monospace;color:var(--txt);font-size:11px}
+  .sum-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;
+    border-bottom:1px solid var(--border)}
+  .sum-row:last-of-type{border-bottom:none}
+  .sum-label{font-size:13px;color:var(--txt-m)}
+  .sum-val{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--txt)}
+  .sum-pct-input{font-family:'IBM Plex Mono',monospace;font-size:12px;width:60px;
+    border:1.5px solid var(--border);border-radius:4px;padding:3px 6px;
+    text-align:right;outline:none;color:var(--txt);transition:border-color .15s}
+  .sum-pct-input:focus{border-color:var(--amber)}
+  .sum-pct-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;
+    border-bottom:1px solid var(--border);gap:8px}
+  .sum-pct-left{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--txt-m)}
+  .sum-total{display:flex;justify-content:space-between;align-items:baseline;
+    padding:16px 0 0;margin-top:4px;border-top:2px solid var(--txt)}
+  .sum-total-label{font-family:'DM Serif Display';font-size:18px;color:var(--txt)}
+  .sum-total-val{font-family:'DM Serif Display';font-size:28px;color:var(--amber)}
+
+  .empty-phase{padding:32px 20px;text-align:center;color:var(--txt-l);font-size:13px;font-style:italic}
+
+  @media(max-width:768px){
+    .header{padding:0 16px;height:auto;min-height:60px;padding:12px 16px}
+    .header{flex-wrap:wrap;gap:8px;height:auto;position:relative}
+    .page{padding:20px 16px}
+    .meta-grid{grid-template-columns:1fr 1fr}
+    .meta-field{border-right:none;border-bottom:1px solid var(--border)}
+    .td-markup,.td-unit{display:none}
+    .li-table th.hide-mob{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="h-left">
+    <a class="h-back" href="/bids.html">← Bids</a>
+    <div class="h-sep"></div>
+    <span class="h-name" id="h-name">Loading…</span>
+  </div>
+  <div class="h-right">
+    <div class="status-bar" id="status-bar"></div>
+    <button class="btn-convert" id="btn-convert" onclick="convertToProject()" style="display:none">
+      Convert to Project →
+    </button>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="converted-banner hidden" id="converted-banner">
+    <span class="cb-text" id="cb-text"></span>
+    <a class="cb-link" id="cb-link" href="#">View Project →</a>
+  </div>
+
+  <!-- METADATA -->
+  <div class="meta-panel">
+    <div class="meta-head">
+      <span class="meta-title">Bid Details</span>
+    </div>
+    <div class="meta-grid">
+      <div class="meta-field"><div class="mf-label">Project Name</div>
+        <input class="mf-input" id="m-name" placeholder="Project name" data-field="name"></div>
+      <div class="meta-field"><div class="mf-label">Client Name</div>
+        <input class="mf-input" id="m-client" placeholder="Client name" data-field="client_name"></div>
+      <div class="meta-field"><div class="mf-label">Property Address</div>
+        <input class="mf-input" id="m-addr" placeholder="123 Main St" data-field="address"></div>
+      <div class="meta-field"><div class="mf-label">Client Email</div>
+        <input class="mf-input" id="m-email" type="email" placeholder="client@example.com" data-field="client_email"></div>
+      <div class="meta-field"><div class="mf-label">Client Phone</div>
+        <input class="mf-input" id="m-phone" placeholder="(251) 555-1234" data-field="client_phone"></div>
+      <div class="meta-field"><div class="mf-label">Estimator / PM</div>
+        <input class="mf-input" id="m-pm" placeholder="Name" data-field="pm"></div>
+      <div class="meta-field"><div class="mf-label">Bid Date</div>
+        <input class="mf-input" id="m-bid-date" type="date" data-field="bid_date"></div>
+      <div class="meta-field"><div class="mf-label">Est. Start</div>
+        <input class="mf-input" id="m-start" type="date" data-field="est_start"></div>
+      <div class="meta-field"><div class="mf-label">Est. Completion</div>
+        <input class="mf-input" id="m-end" type="date" data-field="est_completion"></div>
+    </div>
+    <div class="meta-notes">
+      <div class="mf-label">Notes</div>
+      <textarea class="notes-input" id="m-notes" placeholder="Internal notes, scope clarifications, exclusions…" data-field="notes" rows="3"></textarea>
+    </div>
+  </div>
+
+  <!-- PHASES -->
+  <div class="phases-section">
+    <div class="phases-title">Scope & Line Items</div>
+    <div id="phases-container"></div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="summary">
+    <div class="summary-head">
+      <div class="summary-title">Bid Summary</div>
+    </div>
+    <div class="summary-body">
+      <div class="sum-phases" id="sum-phases"></div>
+      <div class="sum-row">
+        <span class="sum-label">Subtotal</span>
+        <span class="sum-val" id="sum-subtotal">—</span>
+      </div>
+      <div class="sum-pct-row">
+        <div class="sum-pct-left">
+          <span>Overhead</span>
+          <input class="sum-pct-input" id="sum-overhead" type="number" min="0" max="100" step="0.5" placeholder="0">
+          <span style="font-size:12px;color:var(--txt-l)">%</span>
+        </div>
+        <span class="sum-val" id="sum-overhead-val">—</span>
+      </div>
+      <div class="sum-pct-row">
+        <div class="sum-pct-left">
+          <span>Contingency</span>
+          <input class="sum-pct-input" id="sum-contingency" type="number" min="0" max="100" step="0.5" placeholder="0">
+          <span style="font-size:12px;color:var(--txt-l)">%</span>
+        </div>
+        <span class="sum-val" id="sum-contingency-val">—</span>
+      </div>
+      <div class="sum-total">
+        <span class="sum-total-label">Grand Total</span>
+        <span class="sum-total-val" id="sum-grand">—</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const PHASES = [
+  { id: 1, name: 'Pre-Construction & Planning' },
+  { id: 2, name: 'Site Preparation & Foundation' },
+  { id: 3, name: 'Framing' },
+  { id: 4, name: 'Roofing & Exterior' },
+  { id: 5, name: 'Rough Mechanical (Electrical, Plumbing, HVAC)' },
+  { id: 6, name: 'Insulation' },
+  { id: 7, name: 'Drywall & Interior Finishes' },
+  { id: 8, name: 'Flooring' },
+  { id: 9, name: 'Cabinets, Counters & Fixture Trim-Out' },
+  { id: 10, name: 'Final Inspections & Punch List' },
+];
+
+const CATEGORIES = ['labor', 'material', 'subcontractor'];
+const CAT_LABELS = { labor: 'Labor', material: 'Material', subcontractor: 'Subcontract' };
+
+const params = new URLSearchParams(location.search);
+const BID_ID = params.get('id');
+let bid = null;
+let items = []; // all line items, client-side source of truth
+
+function fmt$(n) {
+  if (!n || n === 0) return '$0';
+  return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function lineTotal(item) {
+  const q = Number(item.quantity) || 0;
+  const c = Number(item.unit_cost) || 0;
+  const m = Number(item.markup_pct) || 0;
+  return q * c * (1 + m / 100);
+}
+
+function phaseSubtotal(phaseId) {
+  return items.filter(i => Number(i.phase_id) === phaseId).reduce((a, i) => a + lineTotal(i), 0);
+}
+
+function allSubtotal() {
+  return items.reduce((a, i) => a + lineTotal(i), 0);
+}
+
+// ── STATUS ──────────────────────────────────────────────────────────
+
+function renderStatus() {
+  const statuses = ['draft', 'submitted', 'accepted', 'rejected'];
+  const labels = { draft: '● Draft', submitted: '◆ Submitted', accepted: '✓ Accepted', rejected: '✕ Rejected' };
+  document.getElementById('status-bar').innerHTML = statuses.map(s => `
+    <button class="status-pill pill-${s} ${bid.status === s ? 'active' : ''}"
+      onclick="setStatus('${s}')">${labels[s]}</button>
+  `).join('');
+
+  const convertBtn = document.getElementById('btn-convert');
+  if (bid.status === 'accepted' && !bid.project_id) {
+    convertBtn.style.display = 'block';
+    convertBtn.disabled = false;
+  } else {
+    convertBtn.style.display = 'none';
+  }
+
+  if (bid.project_id) {
+    const banner = document.getElementById('converted-banner');
+    banner.classList.remove('hidden');
+    document.getElementById('cb-text').textContent = 'This bid was converted to an active project.';
+    document.getElementById('cb-link').href = `/project.html?id=${bid.project_id}`;
+  }
+}
+
+async function setStatus(status) {
+  bid.status = status;
+  renderStatus();
+  await fetch(`/api/bids/${BID_ID}`, {
+    method: 'PUT', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ status }),
+  });
+}
+
+// ── METADATA AUTO-SAVE ───────────────────────────────────────────────
+
+let saveTm = null;
+function scheduleSave(field, value) {
+  clearTimeout(saveTm);
+  saveTm = setTimeout(() => {
+    fetch(`/api/bids/${BID_ID}`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ [field]: value }),
+    });
+  }, 600);
+}
+
+function wireMetaInputs() {
+  document.querySelectorAll('[data-field]').forEach(el => {
+    el.addEventListener('input', () => {
+      const field = el.dataset.field;
+      bid[field] = el.value;
+      if (field === 'name') document.getElementById('h-name').textContent = el.value || 'Untitled Bid';
+      scheduleSave(field, el.value);
+    });
+  });
+}
+
+function fillMeta() {
+  document.getElementById('h-name').textContent = bid.name || 'Untitled Bid';
+  document.getElementById('m-name').value = bid.name || '';
+  document.getElementById('m-client').value = bid.client_name || '';
+  document.getElementById('m-addr').value = bid.address || '';
+  document.getElementById('m-email').value = bid.client_email || '';
+  document.getElementById('m-phone').value = bid.client_phone || '';
+  document.getElementById('m-pm').value = bid.pm || '';
+  document.getElementById('m-bid-date').value = bid.bid_date || '';
+  document.getElementById('m-start').value = bid.est_start || '';
+  document.getElementById('m-end').value = bid.est_completion || '';
+  document.getElementById('m-notes').value = bid.notes || '';
+  document.getElementById('sum-overhead').value = bid.overhead_pct || '';
+  document.getElementById('sum-contingency').value = bid.contingency_pct || '';
+}
+
+// ── LINE ITEMS ───────────────────────────────────────────────────────
+
+function renderPhase(phase) {
+  const phaseItems = items.filter(i => Number(i.phase_id) === phase.id);
+  const sub = phaseSubtotal(phase.id);
+
+  const el = document.getElementById(`phase-${phase.id}`);
+
+  el.querySelector('.ph-count').textContent =
+    phaseItems.length ? `${phaseItems.length} item${phaseItems.length !== 1 ? 's' : ''}` : 'No items';
+  el.querySelector('.ph-subtotal').textContent = sub > 0 ? fmt$(sub) : '—';
+
+  const tbody = el.querySelector('tbody');
+
+  if (!phaseItems.length) {
+    tbody.innerHTML = `<tr><td colspan="8">
+      <div class="empty-phase">No line items yet — click "Add Item" to start</div>
+    </td></tr>`;
+  } else {
+    tbody.innerHTML = phaseItems.map(item => renderItemRow(item)).join('');
+    wireItemRows(tbody, phase.id);
+  }
+
+  el.querySelector('.phase-sub').textContent = sub > 0 ? `Phase subtotal: ${fmt$(sub)}` : '';
+  updateSummary();
+}
+
+function renderItemRow(item) {
+  const lt = lineTotal(item);
+  const catClass = `cat-${item.category}`;
+  const catOpts = CATEGORIES.map(c =>
+    `<option value="${c}" ${item.category === c ? 'selected' : ''}>${CAT_LABELS[c]}</option>`
+  ).join('');
+  return `<tr class="li-row ${catClass}" data-id="${item.id}">
+    <td class="td-cat">
+      <select class="li-select" data-f="category">${catOpts}</select>
+    </td>
+    <td class="td-desc">
+      <input class="li-input" data-f="description" value="${escHtml(item.description || '')}" placeholder="Description">
+    </td>
+    <td class="td-qty">
+      <input class="li-input num" data-f="quantity" type="number" min="0" step="any" value="${item.quantity ?? 1}">
+    </td>
+    <td class="td-unit">
+      <input class="li-input" data-f="unit" value="${escHtml(item.unit || '')}" placeholder="hr, sqft…">
+    </td>
+    <td class="td-cost">
+      <input class="li-input num" data-f="unit_cost" type="number" min="0" step="any" value="${item.unit_cost ?? 0}">
+    </td>
+    <td class="td-markup">
+      <input class="li-input num" data-f="markup_pct" type="number" min="0" max="200" step="0.5" value="${item.markup_pct ?? 0}">
+    </td>
+    <td class="td-total">
+      <div class="li-total" data-total="${item.id}">${lt > 0 ? fmt$(lt) : '—'}</div>
+    </td>
+    <td class="td-del li-del">
+      <button class="btn-del-row" data-del="${item.id}" title="Remove">×</button>
+    </td>
+  </tr>`;
+}
+
+function wireItemRows(tbody, phaseId) {
+  tbody.querySelectorAll('.li-row').forEach(row => {
+    const id = Number(row.dataset.id);
+
+    row.querySelectorAll('[data-f]').forEach(input => {
+      const field = input.dataset.f;
+
+      const doUpdate = async () => {
+        const val = (field === 'quantity' || field === 'unit_cost' || field === 'markup_pct')
+          ? parseFloat(input.value) || 0
+          : input.value;
+        const item = items.find(i => Number(i.id) === id);
+        if (!item) return;
+        item[field] = val;
+        if (field === 'category') {
+          row.className = `li-row cat-${val}`;
+        }
+        const lt = lineTotal(item);
+        const totalEl = row.querySelector(`[data-total="${id}"]`);
+        if (totalEl) totalEl.textContent = lt > 0 ? fmt$(lt) : '—';
+        updateSummary();
+        await fetch(`/api/bids/${BID_ID}/items/${id}`, {
+          method: 'PUT', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ [field]: val }),
+        });
+      };
+
+      if (input.tagName === 'SELECT') {
+        input.addEventListener('change', doUpdate);
+      } else {
+        input.addEventListener('change', doUpdate);
+        input.addEventListener('blur', doUpdate);
+      }
+    });
+
+    const delBtn = row.querySelector('[data-del]');
+    if (delBtn) {
+      delBtn.addEventListener('click', () => deleteItem(id, phaseId));
+    }
+  });
+}
+
+async function addItem(phaseId) {
+  const newItem = await fetch(`/api/bids/${BID_ID}/items`, {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ phase_id: phaseId, category: 'labor', description: '', quantity: 1, unit: 'hr', unit_cost: 0, markup_pct: 0 }),
+  }).then(r => r.json());
+
+  items.push(newItem);
+
+  const phase = PHASES.find(p => p.id === phaseId);
+  if (phase) {
+    const el = document.getElementById(`phase-${phase.id}`);
+    if (!el.classList.contains('open')) {
+      el.classList.add('open');
+    }
+    renderPhase(phase);
+    // Focus the description input of the new row
+    setTimeout(() => {
+      const tbody = el.querySelector('tbody');
+      const lastRow = tbody.querySelector('.li-row:last-child');
+      if (lastRow) {
+        const descInput = lastRow.querySelector('[data-f="description"]');
+        if (descInput) descInput.focus();
+      }
+    }, 50);
+  }
+}
+
+async function deleteItem(id, phaseId) {
+  if (!confirm('Remove this line item?')) return;
+  items = items.filter(i => Number(i.id) !== id);
+  await fetch(`/api/bids/${BID_ID}/items/${id}`, { method: 'DELETE' });
+  const phase = PHASES.find(p => p.id === phaseId);
+  if (phase) renderPhase(phase);
+}
+
+// ── SUMMARY ──────────────────────────────────────────────────────────
+
+function updateSummary() {
+  const sub = allSubtotal();
+  const overheadPct = parseFloat(document.getElementById('sum-overhead').value) || 0;
+  const contingencyPct = parseFloat(document.getElementById('sum-contingency').value) || 0;
+  const overhead = sub * overheadPct / 100;
+  const contingency = (sub + overhead) * contingencyPct / 100;
+  const grand = sub + overhead + contingency;
+
+  document.getElementById('sum-subtotal').textContent = fmt$(sub);
+  document.getElementById('sum-overhead-val').textContent = overhead > 0 ? fmt$(overhead) : '—';
+  document.getElementById('sum-contingency-val').textContent = contingency > 0 ? fmt$(contingency) : '—';
+  document.getElementById('sum-grand').textContent = fmt$(grand);
+
+  // phase breakdown
+  document.getElementById('sum-phases').innerHTML = PHASES
+    .filter(p => phaseSubtotal(p.id) > 0)
+    .map(p => `<div class="sum-phase-row">
+      <span class="sum-phase-name">${p.name}</span>
+      <span class="sum-phase-val">${fmt$(phaseSubtotal(p.id))}</span>
+    </div>`).join('') || '<div style="font-size:12px;color:var(--txt-l);font-style:italic">Add line items to see a phase breakdown</div>';
+
+  // update phase headers
+  PHASES.forEach(p => {
+    const el = document.getElementById(`phase-${p.id}`);
+    if (el) {
+      const sub = phaseSubtotal(p.id);
+      el.querySelector('.ph-subtotal').textContent = sub > 0 ? fmt$(sub) : '—';
+      const cnt = items.filter(i => Number(i.phase_id) === p.id).length;
+      el.querySelector('.ph-count').textContent = cnt ? `${cnt} item${cnt !== 1 ? 's' : ''}` : 'No items';
+      el.querySelector('.phase-sub').textContent = sub > 0 ? `Phase subtotal: ${fmt$(sub)}` : '';
+    }
+  });
+}
+
+function wireSummaryPercentages() {
+  ['sum-overhead', 'sum-contingency'].forEach(id => {
+    const field = id === 'sum-overhead' ? 'overhead_pct' : 'contingency_pct';
+    document.getElementById(id).addEventListener('input', () => {
+      updateSummary();
+      clearTimeout(saveTm);
+      saveTm = setTimeout(() => {
+        const val = parseFloat(document.getElementById(id).value) || 0;
+        bid[field] = val;
+        fetch(`/api/bids/${BID_ID}`, {
+          method: 'PUT', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ [field]: val }),
+        });
+      }, 600);
+    });
+  });
+}
+
+// ── CONVERT TO PROJECT ───────────────────────────────────────────────
+
+async function convertToProject() {
+  if (!confirm('Convert this bid to an active project? The project will be created with this bid\'s client and scope info, and the bid will remain in your records.')) return;
+  const btn = document.getElementById('btn-convert');
+  btn.disabled = true;
+  btn.textContent = 'Converting…';
+  try {
+    const { project_id, error } = await fetch(`/api/bids/${BID_ID}/convert`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+    }).then(r => r.json());
+    if (error) { alert(error); btn.disabled = false; btn.textContent = 'Convert to Project →'; return; }
+    bid.project_id = project_id;
+    bid.status = 'accepted';
+    renderStatus();
+    window.location.href = `/project.html?id=${project_id}`;
+  } catch(e) {
+    alert('Conversion failed. Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Convert to Project →';
+  }
+}
+
+// ── PHASES RENDER ────────────────────────────────────────────────────
+
+function buildPhaseShells() {
+  const container = document.getElementById('phases-container');
+  container.innerHTML = PHASES.map(p => `
+    <div class="phase" id="phase-${p.id}">
+      <div class="phase-header" onclick="togglePhase(${p.id})">
+        <span class="ph-num">0${p.id > 9 ? '' : p.id < 10 ? p.id : p.id}</span>
+        <span class="ph-name">${p.name}</span>
+        <div class="ph-meta">
+          <span class="ph-count">No items</span>
+          <span class="ph-subtotal">—</span>
+        </div>
+        <span class="ph-chevron">▼</span>
+      </div>
+      <div class="phase-body">
+        <table class="li-table">
+          <thead>
+            <tr>
+              <th class="td-cat">Category</th>
+              <th class="td-desc">Description</th>
+              <th class="td-qty num">Qty</th>
+              <th class="td-unit hide-mob">Unit</th>
+              <th class="td-cost num">Unit Cost</th>
+              <th class="td-markup hide-mob num">Markup %</th>
+              <th class="td-total num">Total</th>
+              <th class="td-del"></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="phase-add">
+          <button class="btn-add-item" onclick="addItem(${p.id})">+ Add Item</button>
+          <span class="phase-sub"></span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function togglePhase(id) {
+  const el = document.getElementById(`phase-${id}`);
+  el.classList.toggle('open');
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function init() {
+  if (!BID_ID) { document.body.innerHTML = '<p style="padding:40px">No bid ID specified.</p>'; return; }
+
+  [bid, items] = await Promise.all([
+    fetch(`/api/bids/${BID_ID}`).then(r => r.json()),
+    fetch(`/api/bids/${BID_ID}/items`).then(r => r.json()),
+  ]);
+
+  if (bid.error) { document.body.innerHTML = '<p style="padding:40px">Bid not found.</p>'; return; }
+
+  fillMeta();
+  renderStatus();
+  buildPhaseShells();
+  PHASES.forEach(p => renderPhase(p));
+  updateSummary();
+  wireMetaInputs();
+  wireSummaryPercentages();
+}
+
+init();
+</script>
+</body>
+</html>

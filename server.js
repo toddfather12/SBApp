@@ -7,6 +7,10 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Ensure DB is initialized before any request is handled
+const ready = db.init();
+app.use((req, res, next) => ready.then(next).catch(() => res.status(500).json({ error: 'Database unavailable' })));
+
 // ── CUSTOMER PORTAL (must come before catch-all) ──────────────────
 app.get('/c/:token', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'customer.html'));
@@ -207,21 +211,86 @@ app.post('/api/admin/send-updates', async (req, res) => {
   }
 });
 
+// ── BIDS ──────────────────────────────────────────────────────────
+
+app.get('/api/bids', async (req, res) => {
+  res.json(await db.getAllBids());
+});
+
+app.post('/api/bids', async (req, res) => {
+  try {
+    const id = await db.createBid(req.body);
+    res.json({ id });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.get('/api/bids/:id', async (req, res) => {
+  const bid = await db.getBid(req.params.id);
+  if (!bid) return res.status(404).json({ error: 'Bid not found' });
+  res.json(bid);
+});
+
+app.put('/api/bids/:id', async (req, res) => {
+  await db.updateBid(req.params.id, req.body);
+  res.json({ ok: true });
+});
+
+app.delete('/api/bids/:id', async (req, res) => {
+  await db.deleteBid(req.params.id);
+  res.json({ ok: true });
+});
+
+app.get('/api/bids/:id/items', async (req, res) => {
+  res.json(await db.getBidItems(req.params.id));
+});
+
+app.post('/api/bids/:id/items', async (req, res) => {
+  try {
+    const itemId = await db.addBidItem(req.params.id, req.body);
+    const items = await db.getBidItems(req.params.id);
+    res.json(items.find(i => Number(i.id) === itemId));
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.put('/api/bids/:id/items/:itemId', async (req, res) => {
+  await db.updateBidItem(req.params.itemId, req.body);
+  res.json({ ok: true });
+});
+
+app.delete('/api/bids/:id/items/:itemId', async (req, res) => {
+  await db.deleteBidItem(req.params.itemId);
+  res.json({ ok: true });
+});
+
+app.post('/api/bids/:id/convert', async (req, res) => {
+  try {
+    const projectId = await db.convertBidToProject(req.params.id);
+    res.json({ project_id: projectId });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 // ── CATCH-ALL ─────────────────────────────────────────────────────
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-const PORT = process.env.PORT || 3000;
-
-db.init().then(() => {
-  scheduler.start();
-  app.listen(PORT, () => {
-    console.log(`\n  Southern Bay Construction`);
-    console.log(`  Running at http://localhost:${PORT}\n`);
+// Local dev only
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  ready.then(() => {
+    scheduler.start();
+    app.listen(PORT, () => {
+      console.log(`\n  Southern Bay Construction`);
+      console.log(`  Running at http://localhost:${PORT}\n`);
+    });
   });
-}).catch(err => {
-  console.error('Database init failed:', err);
-  process.exit(1);
-});
+}
+
+module.exports = app;

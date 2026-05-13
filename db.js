@@ -77,6 +77,37 @@ async function init() {
       FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
       UNIQUE(project_id, phase_id, dec_index)
     );
+    CREATE TABLE IF NOT EXISTS bids (
+      id              INTEGER PRIMARY KEY AUTOINCREMENT,
+      name            TEXT NOT NULL,
+      client_name     TEXT DEFAULT '',
+      client_email    TEXT DEFAULT '',
+      client_phone    TEXT DEFAULT '',
+      address         TEXT DEFAULT '',
+      bid_date        TEXT DEFAULT '',
+      est_start       TEXT DEFAULT '',
+      est_completion  TEXT DEFAULT '',
+      pm              TEXT DEFAULT '',
+      status          TEXT DEFAULT 'draft',
+      overhead_pct    REAL DEFAULT 0,
+      contingency_pct REAL DEFAULT 0,
+      notes           TEXT DEFAULT '',
+      project_id      INTEGER DEFAULT NULL,
+      created_at      TEXT DEFAULT (datetime('now')),
+      updated_at      TEXT DEFAULT (datetime('now'))
+    );
+    CREATE TABLE IF NOT EXISTS bid_line_items (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      bid_id      INTEGER NOT NULL,
+      phase_id    INTEGER NOT NULL,
+      category    TEXT NOT NULL DEFAULT 'labor',
+      description TEXT DEFAULT '',
+      quantity    REAL DEFAULT 1,
+      unit        TEXT DEFAULT '',
+      unit_cost   REAL DEFAULT 0,
+      markup_pct  REAL DEFAULT 0,
+      FOREIGN KEY (bid_id) REFERENCES bids(id) ON DELETE CASCADE
+    );
   `);
   // Column migrations — silently ignored if column already exists
   for (const sql of [
@@ -321,5 +352,103 @@ module.exports = {
       ORDER BY p.name ASC
     `);
     return r.rows;
+  },
+
+  // ── BIDS ──────────────────────────────────────────────────────
+
+  async getAllBids() {
+    const r = await client.execute(`
+      SELECT b.*,
+        COALESCE(SUM(bli.quantity * bli.unit_cost * (1 + bli.markup_pct / 100)), 0) AS subtotal,
+        COUNT(bli.id) AS item_count
+      FROM bids b
+      LEFT JOIN bid_line_items bli ON bli.bid_id = b.id
+      GROUP BY b.id
+      ORDER BY b.updated_at DESC
+    `);
+    return r.rows;
+  },
+
+  async getBid(id) {
+    const r = await client.execute({ sql: 'SELECT * FROM bids WHERE id = ?', args: [id] });
+    return r.rows[0] ?? null;
+  },
+
+  async createBid({ name, client_name, client_email, client_phone, address, bid_date, est_start, est_completion, pm }) {
+    const r = await client.execute({
+      sql: `INSERT INTO bids (name, client_name, client_email, client_phone, address, bid_date, est_start, est_completion, pm)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [
+        name,
+        client_name || '', client_email || '', client_phone || '',
+        address || '', bid_date || '', est_start || '', est_completion || '', pm || '',
+      ],
+    });
+    return Number(r.lastInsertRowid);
+  },
+
+  async updateBid(id, fields) {
+    const allowed = ['name', 'client_name', 'client_email', 'client_phone', 'address',
+                     'bid_date', 'est_start', 'est_completion', 'pm', 'status',
+                     'overhead_pct', 'contingency_pct', 'notes'];
+    const keys = Object.keys(fields).filter(k => allowed.includes(k));
+    if (!keys.length) return;
+    await client.execute({
+      sql: `UPDATE bids SET ${keys.map(k => `${k} = ?`).join(', ')}, updated_at = datetime('now') WHERE id = ?`,
+      args: [...keys.map(k => fields[k]), id],
+    });
+  },
+
+  async deleteBid(id) {
+    await client.execute({ sql: 'DELETE FROM bids WHERE id = ?', args: [id] });
+  },
+
+  async getBidItems(bidId) {
+    const r = await client.execute({
+      sql: 'SELECT * FROM bid_line_items WHERE bid_id = ? ORDER BY id ASC',
+      args: [bidId],
+    });
+    return r.rows;
+  },
+
+  async addBidItem(bidId, { phase_id, category, description, quantity, unit, unit_cost, markup_pct }) {
+    const r = await client.execute({
+      sql: `INSERT INTO bid_line_items (bid_id, phase_id, category, description, quantity, unit, unit_cost, markup_pct)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [bidId, phase_id, category || 'labor', description || '', quantity ?? 1, unit || '', unit_cost ?? 0, markup_pct ?? 0],
+    });
+    await client.execute({ sql: `UPDATE bids SET updated_at = datetime('now') WHERE id = ?`, args: [bidId] });
+    return Number(r.lastInsertRowid);
+  },
+
+  async updateBidItem(id, fields) {
+    const allowed = ['category', 'description', 'quantity', 'unit', 'unit_cost', 'markup_pct'];
+    const keys = Object.keys(fields).filter(k => allowed.includes(k));
+    if (!keys.length) return;
+    await client.execute({
+      sql: `UPDATE bid_line_items SET ${keys.map(k => `${k} = ?`).join(', ')} WHERE id = ?`,
+      args: [...keys.map(k => fields[k]), id],
+    });
+  },
+
+  async deleteBidItem(id) {
+    await client.execute({ sql: 'DELETE FROM bid_line_items WHERE id = ?', args: [id] });
+  },
+
+  async convertBidToProject(bidId) {
+    const bid = await this.getBid(bidId);
+    if (!bid) throw new Error('Bid not found');
+    if (bid.project_id) throw new Error('Bid already converted to a project');
+    const r = await client.execute({
+      sql: `INSERT INTO projects (name, client_name, address, contract_date, est_completion, pm, client_email)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      args: [bid.name, bid.client_name || '', bid.address || '', bid.est_start || '', bid.est_completion || '', bid.pm || '', bid.client_email || ''],
+    });
+    const projectId = Number(r.lastInsertRowid);
+    await client.execute({
+      sql: `UPDATE bids SET project_id = ?, status = 'accepted', updated_at = datetime('now') WHERE id = ?`,
+      args: [projectId, bidId],
+    });
+    return projectId;
   },
 };

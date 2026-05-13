@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bid Estimator — Southern Bay Construction</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --dark:#1A2733; --mid:#2C3E50; --terra:#B85038; --amber:#C49A3C;
+    --cream:#F7F2EB; --sand:#EDE5D8; --white:#FFFFFF; --txt:#2C3440;
+    --txt-m:#5A6A7A; --txt-l:#8A9AB0; --border:#D5C9BC; --green:#3A6A5A;
+    --green-l:#EAF3E8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);min-height:100vh}
+
+  .header{background:var(--dark);border-bottom:3px solid var(--amber);padding:0 32px;height:60px;
+    display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+  .h-brand{display:flex;align-items:center;gap:14px}
+  .h-logo{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;
+    color:var(--amber);letter-spacing:2px;text-transform:uppercase}
+  .h-sep{width:1px;height:20px;background:#2C3E50}
+  .h-sub{font-family:'DM Serif Display';font-size:17px;color:var(--white)}
+  .h-nav{display:flex;align-items:center;gap:6px}
+  .nav-link{font-size:12px;font-weight:500;color:#6A8AA0;text-decoration:none;
+    padding:6px 14px;border-radius:5px;transition:all .15s;letter-spacing:.2px}
+  .nav-link:hover{color:var(--white);background:rgba(255,255,255,.08)}
+  .nav-link.active{color:var(--white);background:rgba(255,255,255,.12)}
+  .btn-new{background:var(--amber);color:#fff;border:none;border-radius:6px;
+    padding:9px 20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
+    cursor:pointer;transition:background .15s;letter-spacing:.3px}
+  .btn-new:hover{background:#A87C28}
+
+  .page{max-width:1100px;margin:0 auto;padding:36px 24px}
+  .pg-title{font-family:'DM Serif Display';font-size:28px;color:var(--txt);margin-bottom:6px}
+  .pg-sub{font-size:14px;color:var(--txt-m);margin-bottom:32px}
+
+  .stats{display:flex;gap:16px;margin-bottom:36px;flex-wrap:wrap}
+  .stat{background:var(--white);border:1px solid var(--border);border-radius:8px;
+    padding:16px 24px;flex:1;min-width:140px;text-align:center}
+  .stat-n{font-family:'DM Serif Display';font-size:32px;color:var(--amber)}
+  .stat-l{font-size:12px;color:var(--txt-m);margin-top:2px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px}
+
+  .card{background:var(--white);border:1px solid var(--border);border-radius:10px;
+    overflow:hidden;cursor:pointer;transition:box-shadow .2s,transform .15s;text-decoration:none;color:inherit;display:block}
+  .card:hover{box-shadow:0 6px 28px rgba(0,0,0,.1);transform:translateY(-2px)}
+  .card-head{background:var(--dark);padding:16px 20px;display:flex;align-items:flex-start;
+    justify-content:space-between;gap:10px}
+  .card-name{font-family:'DM Serif Display';font-size:18px;color:var(--white);line-height:1.3}
+  .card-client{font-size:12px;color:#6A8AA0;margin-top:3px}
+  .card-status{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;
+    padding:3px 9px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+  .s-draft{background:#1A2020;color:#8AABB0;border:1px solid #253040}
+  .s-submitted{background:#1E1800;color:#C49A3C;border:1px solid #3A3010}
+  .s-accepted{background:#0F2A1A;color:#5AAA80;border:1px solid #204030}
+  .s-rejected{background:#2A0F0F;color:#AA5A5A;border:1px solid #401020}
+
+  .card-body{padding:16px 20px}
+  .card-row{display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap}
+  .card-field{flex:1;min-width:90px}
+  .cf-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;
+    color:var(--amber);margin-bottom:2px}
+  .cf-val{font-size:13px;color:var(--txt);font-weight:500}
+  .cf-val.empty{color:var(--txt-l);font-style:italic}
+  .bid-total{font-family:'DM Serif Display';font-size:22px;color:var(--txt);margin-top:4px}
+  .bid-total-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;
+    color:var(--amber);margin-bottom:2px}
+
+  .card-foot{padding:10px 20px;border-top:1px solid var(--border);background:var(--sand);
+    display:flex;justify-content:space-between;align-items:center}
+  .card-date{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txt-l)}
+  .card-del{font-size:11px;color:var(--txt-l);background:none;border:none;cursor:pointer;
+    padding:3px 8px;border-radius:4px;transition:all .15s;font-family:'DM Sans',sans-serif}
+  .card-del:hover{background:#FEE;color:#C04030}
+
+  .empty{text-align:center;padding:80px 24px;color:var(--txt-m)}
+  .empty-icon{font-size:48px;margin-bottom:16px;opacity:.4}
+  .empty-title{font-family:'DM Serif Display';font-size:22px;color:var(--txt);margin-bottom:8px}
+  .empty-sub{font-size:14px;line-height:1.6;max-width:380px;margin:0 auto 24px}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;
+    display:none;align-items:center;justify-content:center;padding:20px}
+  .overlay.show{display:flex}
+  .modal{background:var(--white);border-radius:12px;width:100%;max-width:540px;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden}
+  .modal-head{background:var(--dark);padding:20px 24px;border-bottom:2px solid var(--amber)}
+  .modal-title{font-family:'DM Serif Display';font-size:20px;color:var(--white)}
+  .modal-sub{font-size:12px;color:#6A8AA0;margin-top:3px}
+  .modal-body{padding:24px}
+  .frow{display:flex;gap:14px;margin-bottom:16px}
+  .frow:last-child{margin-bottom:0}
+  .fgrp{display:flex;flex-direction:column;flex:1}
+  label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;
+    color:var(--txt-m);margin-bottom:6px}
+  input[type=text],input[type=date],input[type=email],input[type=tel]{
+    font-family:'DM Sans',sans-serif;font-size:14px;border:1.5px solid var(--border);
+    border-radius:6px;padding:9px 12px;outline:none;color:var(--txt);background:var(--white);
+    width:100%;transition:border-color .15s}
+  input:focus{border-color:var(--amber)}
+  .modal-foot{padding:16px 24px;border-top:1px solid var(--border);
+    display:flex;justify-content:flex-end;gap:10px;background:var(--sand)}
+  .btn-cancel{background:none;border:1.5px solid var(--border);border-radius:6px;
+    padding:9px 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;
+    color:var(--txt-m);cursor:pointer;transition:all .15s}
+  .btn-cancel:hover{border-color:var(--txt-m);color:var(--txt)}
+  .btn-create{background:var(--amber);color:#fff;border:none;border-radius:6px;
+    padding:9px 22px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
+    cursor:pointer;transition:background .15s}
+  .btn-create:hover{background:#A87C28}
+
+  .project-link{font-size:11px;color:var(--green);text-decoration:none;font-weight:500}
+  .project-link:hover{text-decoration:underline}
+
+  @media(max-width:600px){
+    .page{padding:24px 16px}
+    .frow{flex-direction:column;gap:12px}
+    .header{padding:0 16px}
+    .h-sub{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="h-brand">
+    <span class="h-logo">Southern Bay Construction</span>
+    <div class="h-sep"></div>
+    <span class="h-sub">Bid Estimator</span>
+  </div>
+  <div class="h-nav">
+    <a class="nav-link" href="/index.html">Projects</a>
+    <a class="nav-link active" href="/bids.html">Bids</a>
+    <button class="btn-new" onclick="openModal()">+ New Bid</button>
+  </div>
+</div>
+
+<div class="page">
+  <div class="pg-title">Bid Estimates</div>
+  <div class="pg-sub" id="pg-sub">Loading...</div>
+  <div class="stats" id="stats-row"></div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">New Bid Estimate</div>
+      <div class="modal-sub">Start with the basics — you'll fill in line items on the next screen</div>
+    </div>
+    <div class="modal-body">
+      <div class="frow">
+        <div class="fgrp" style="flex:2">
+          <label>Project Name *</label>
+          <input type="text" id="f-name" placeholder="Smith Residence — Custom Home Build">
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fgrp">
+          <label>Client Name</label>
+          <input type="text" id="f-client" placeholder="John & Jane Smith">
+        </div>
+        <div class="fgrp">
+          <label>Property Address</label>
+          <input type="text" id="f-addr" placeholder="123 Main St, Mobile, AL">
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fgrp">
+          <label>Client Email</label>
+          <input type="email" id="f-email" placeholder="client@example.com">
+        </div>
+        <div class="fgrp">
+          <label>Client Phone</label>
+          <input type="tel" id="f-phone" placeholder="(251) 555-1234">
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fgrp">
+          <label>Bid Date</label>
+          <input type="date" id="f-bid-date">
+        </div>
+        <div class="fgrp">
+          <label>Est. Start</label>
+          <input type="date" id="f-start">
+        </div>
+        <div class="fgrp">
+          <label>Est. Completion</label>
+          <input type="date" id="f-end">
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fgrp">
+          <label>Estimator / PM</label>
+          <input type="text" id="f-pm" placeholder="Damian">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-create" onclick="createBid()">Create Bid</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STATUS_LABELS = { draft: '● DRAFT', submitted: '◆ SUBMITTED', accepted: '✓ ACCEPTED', rejected: '✕ REJECTED' };
+const STATUS_CLASSES = { draft: 's-draft', submitted: 's-submitted', accepted: 's-accepted', rejected: 's-rejected' };
+
+function fmt$(n) {
+  return '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function grandTotal(bid) {
+  const sub = Number(bid.subtotal || 0);
+  const overhead = sub * (Number(bid.overhead_pct || 0) / 100);
+  const contingency = (sub + overhead) * (Number(bid.contingency_pct || 0) / 100);
+  return sub + overhead + contingency;
+}
+
+function timeAgo(dt) {
+  if (!dt) return 'recently';
+  const diff = (Date.now() - new Date(dt + 'Z').getTime()) / 1000;
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+  return `${Math.floor(diff/86400)}d ago`;
+}
+
+function fmtDate(d) {
+  if (!d || !d.trim()) return null;
+  const parts = d.split('-');
+  if (parts.length < 3) return d;
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[parseInt(parts[1]) - 1]} ${parseInt(parts[2])}, ${parts[0]}`;
+}
+
+async function load() {
+  const bids = await fetch('/api/bids').then(r => r.json());
+
+  const byStatus = s => bids.filter(b => b.status === s).length;
+  const totalVal = bids.reduce((a, b) => a + grandTotal(b), 0);
+  const accepted = byStatus('accepted');
+  const total = bids.length;
+  const winRate = total > 0 ? Math.round((accepted / total) * 100) : 0;
+
+  document.getElementById('pg-sub').textContent =
+    bids.length === 0 ? 'No bids yet — create one to get started'
+    : `${bids.length} bid${bids.length !== 1 ? 's' : ''} · ${byStatus('draft')} draft · ${byStatus('submitted')} submitted`;
+
+  document.getElementById('stats-row').innerHTML = bids.length ? `
+    <div class="stat"><div class="stat-n">${total}</div><div class="stat-l">Total Bids</div></div>
+    <div class="stat"><div class="stat-n">${byStatus('submitted')}</div><div class="stat-l">Submitted</div></div>
+    <div class="stat"><div class="stat-n">${winRate}%</div><div class="stat-l">Win Rate</div></div>
+    <div class="stat"><div class="stat-n">${fmt$(totalVal)}</div><div class="stat-l">Pipeline Value</div></div>
+  ` : '';
+
+  const grid = document.getElementById('grid');
+  if (!bids.length) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
+      <div class="empty-icon">📋</div>
+      <div class="empty-title">No bids yet</div>
+      <div class="empty-sub">Create your first bid estimate to start building scopes, line items, and pricing — then convert winning bids directly into active projects.</div>
+      <button class="btn-new" onclick="openModal()">+ Create First Bid</button>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = bids.map(b => {
+    const total = grandTotal(b);
+    const projectLink = b.project_id
+      ? `<a class="project-link" href="/project.html?id=${b.project_id}" onclick="event.stopPropagation()">View Project →</a>`
+      : '';
+    return `
+    <a class="card" href="/bid.html?id=${b.id}">
+      <div class="card-head">
+        <div>
+          <div class="card-name">${b.name}</div>
+          <div class="card-client">${b.client_name || 'No client name'}</div>
+        </div>
+        <span class="card-status ${STATUS_CLASSES[b.status] || 's-draft'}">
+          ${STATUS_LABELS[b.status] || b.status.toUpperCase()}
+        </span>
+      </div>
+      <div class="card-body">
+        <div class="card-row">
+          <div class="card-field">
+            <div class="cf-label">Address</div>
+            <div class="cf-val ${!b.address ? 'empty' : ''}">${b.address || 'Not set'}</div>
+          </div>
+          <div class="card-field">
+            <div class="cf-label">Estimator</div>
+            <div class="cf-val ${!b.pm ? 'empty' : ''}">${b.pm || 'Not assigned'}</div>
+          </div>
+        </div>
+        <div class="card-row">
+          <div class="card-field">
+            <div class="cf-label">Bid Date</div>
+            <div class="cf-val ${!b.bid_date ? 'empty' : ''}">${fmtDate(b.bid_date) || 'Not set'}</div>
+          </div>
+          <div class="card-field">
+            <div class="cf-label">Est. Completion</div>
+            <div class="cf-val ${!b.est_completion ? 'empty' : ''}">${fmtDate(b.est_completion) || 'Not set'}</div>
+          </div>
+        </div>
+        <div>
+          <div class="bid-total-label">Bid Total (${b.item_count} line items)</div>
+          <div class="bid-total">${total > 0 ? fmt$(total) : '—'}</div>
+        </div>
+      </div>
+      <div class="card-foot">
+        <span class="card-date">${projectLink || 'Updated ' + timeAgo(b.updated_at)}</span>
+        <button class="card-del" onclick="del(event, ${b.id})">Delete</button>
+      </div>
+    </a>`;
+  }).join('');
+}
+
+async function del(e, id) {
+  e.preventDefault();
+  if (!confirm('Delete this bid? This cannot be undone.')) return;
+  await fetch(`/api/bids/${id}`, { method: 'DELETE' });
+  load();
+}
+
+function openModal() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('f-bid-date').value = today;
+  document.getElementById('f-start').value = today;
+  const end = new Date(); end.setMonth(end.getMonth() + 6);
+  document.getElementById('f-end').value = end.toISOString().split('T')[0];
+  document.getElementById('overlay').classList.add('show');
+  setTimeout(() => document.getElementById('f-name').focus(), 100);
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('overlay')) return;
+  document.getElementById('overlay').classList.remove('show');
+  ['f-name','f-client','f-addr','f-email','f-phone','f-pm'].forEach(id => document.getElementById(id).value = '');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.getElementById('overlay').classList.remove('show');
+  if (e.key === 'Enter' && document.getElementById('overlay').classList.contains('show')) createBid();
+});
+
+async function createBid() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { document.getElementById('f-name').focus(); return; }
+  const body = {
+    name,
+    client_name: document.getElementById('f-client').value.trim(),
+    address: document.getElementById('f-addr').value.trim(),
+    client_email: document.getElementById('f-email').value.trim(),
+    client_phone: document.getElementById('f-phone').value.trim(),
+    bid_date: document.getElementById('f-bid-date').value,
+    est_start: document.getElementById('f-start').value,
+    est_completion: document.getElementById('f-end').value,
+    pm: document.getElementById('f-pm').value.trim(),
+  };
+  const { id } = await fetch('/api/bids', {
+    method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body),
+  }).then(r => r.json());
+  window.location.href = `/bid.html?id=${id}`;
+}
+
+load();
+</script>
+</body>
+</html>
